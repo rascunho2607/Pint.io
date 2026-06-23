@@ -177,12 +177,64 @@
 
 		.help { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 9px 13px; border-radius: 999px; background: rgba(255,249,232,.58); border: 1px solid rgba(80,65,45,.08); color: rgba(80,69,58,.72); font-size: 12px; font-weight: 850; pointer-events: none; backdrop-filter: blur(6px); }
 		.toast { position: absolute; left: 50%; top: 116px; transform: translateX(-50%) translateY(-8px); padding: 10px 15px; border-radius: 999px; background: rgba(255,249,232,.94); border: 1px solid rgba(80,65,45,.11); box-shadow: 0 10px 30px rgba(72,51,29,.13); font-size: 13px; font-weight: 950; color: #4f463e; opacity: 0; transition: opacity .18s ease, transform .18s ease; }
+
+		.box-tip { margin-top: 10px; font-size: 12px; line-height: 1.35; color: #85796d; }
+
+		.touch-ui {
+			position: absolute; inset: 0; display: none; pointer-events: none;
+		}
+		.touch-ui.active { display: block; }
+		.touch-joystick-wrap {
+			position: absolute; left: 18px; bottom: 84px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+		}
+		.touch-joystick {
+			position: relative; width: 148px; height: 148px; border-radius: 50%; pointer-events: auto; touch-action: none;
+			background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), rgba(226,212,185,.62));
+			border: 1px solid rgba(80,65,45,.11);
+			box-shadow: 0 14px 36px rgba(72,51,29,.12), inset 0 1px 0 rgba(255,255,255,.75);
+			backdrop-filter: blur(10px);
+		}
+		.touch-joystick::before {
+			content: ""; position: absolute; inset: 18px; border-radius: 50%;
+			border: 1px dashed rgba(98,79,58,.16);
+		}
+		.touch-joystick[data-active="1"] {
+			box-shadow: 0 18px 42px rgba(72,51,29,.15), inset 0 1px 0 rgba(255,255,255,.78), 0 0 0 6px rgba(159,214,207,.14);
+		}
+		.touch-knob {
+			position: absolute; left: 50%; top: 50%; width: 68px; height: 68px; border-radius: 50%;
+			transform: translate(-50%, -50%);
+			background: linear-gradient(145deg, rgba(247,223,180,.98), rgba(233,196,118,.96));
+			border: 1px solid rgba(100,78,50,.12);
+			box-shadow: 0 8px 18px rgba(94,68,33,.18), inset 0 1px 0 rgba(255,255,255,.72);
+		}
+		.touch-joystick-label {
+			padding: 8px 12px; border-radius: 999px; background: rgba(255,249,232,.72); border: 1px solid rgba(80,65,45,.08);
+			font-size: 11px; font-weight: 900; color: #6c6054; letter-spacing: .03em;
+		}
+		.touch-actions {
+			position: absolute; right: 18px; bottom: 84px; display: grid; grid-template-columns: repeat(2, 78px); gap: 12px; pointer-events: auto;
+		}
+		.touch-action-btn {
+			width: 78px; height: 78px; border-radius: 24px; border: 1px solid rgba(80,65,45,.10);
+			background: linear-gradient(145deg, rgba(255,250,235,.96), rgba(241,226,198,.92));
+			box-shadow: 0 14px 34px rgba(72,51,29,.13), inset 0 1px 0 rgba(255,255,255,.76);
+			display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+			font: inherit; color: #51473f; font-weight: 950; cursor: pointer; touch-action: manipulation;
+		}
+		.touch-action-btn.primary { background: linear-gradient(145deg, rgba(247,223,180,.98), rgba(233,196,118,.96)); }
+		.touch-action-btn .icon { font-size: 24px; line-height: 1; }
+		.touch-action-btn .txt { font-size: 11px; letter-spacing: .02em; }
+		.touch-action-btn:active { transform: scale(.97); }
+
 		.toast.active { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 		@media (max-width: 950px) {
 			.grid, .mode-summary, .mode-picker-layout { grid-template-columns: 1fr; }
 			.leaderboard { display: none; }
 			.mission { top: auto; bottom: 82px; width: min(430px, calc(100vw - 36px)); }
+			.touch-joystick-wrap { bottom: 110px; }
+			.touch-actions { bottom: 110px; }
 		}
 		@media (max-width: 650px) {
 			.card { padding: 28px 20px; border-radius: 28px; }
@@ -238,6 +290,8 @@
 						<input id="visualFps" type="range" min="6" max="30" value="12" />
 						<label style="margin-top:16px"><span>Força da trepidação</span><strong id="jitterLabel">1.6</strong></label>
 						<input id="jitterStrength" type="range" min="0" max="4" step="0.1" value="1.6" />
+						<label style="margin-top:16px"><span>Controles touch</span><input id="menuTouchControls" type="checkbox" /></label>
+						<div class="box-tip">Aparecem automaticamente no celular. No desktop você pode habilitar para testar a UI mobile.</div>
 					</div>
 				</div>
 
@@ -356,7 +410,21 @@
 			<div class="hud-card leaderboard"><h2>Top blobs</h2><div id="leaderboardRows"></div></div>
 			<div class="hud-card bottom-tools"><button id="pauseButton" class="secondary">Pausar</button><label class="toggle-pill"><input id="hudStopMotion" type="checkbox" checked /><span>stop motion</span></label></div>
 			<div class="hud-card minimap"><canvas id="miniCanvas" width="260" height="260"></canvas></div>
-			<div class="help">mouse move · P pausa · ESC menu</div>
+			<div id="helpText" class="help">mouse move · Espaço divide · W ejeta · Shift dash · P pausa · ESC menu</div>
+			<div id="touchControls" class="touch-ui" aria-hidden="true">
+				<div class="touch-joystick-wrap">
+					<div id="touchJoystick" class="touch-joystick" data-active="0">
+						<div id="touchKnob" class="touch-knob"></div>
+					</div>
+					<div class="touch-joystick-label">mover</div>
+				</div>
+				<div class="touch-actions">
+					<button id="touchSplitButton" class="touch-action-btn primary" type="button"><span class="icon">◉</span><span class="txt">dividir</span></button>
+					<button id="touchEjectButton" class="touch-action-btn" type="button"><span class="icon">•</span><span class="txt">ejetar</span></button>
+					<button id="touchDashButton" class="touch-action-btn" type="button"><span class="icon">➜</span><span class="txt">dash</span></button>
+					<button id="touchPauseButton" class="touch-action-btn" type="button"><span class="icon">Ⅱ</span><span class="txt">pausa</span></button>
+				</div>
+			</div>
 			<div id="toast" class="toast"></div>
 		</div>
 	</div>
@@ -401,7 +469,16 @@
 		const visualFpsInput = document.getElementById("visualFps");
 		const jitterStrengthInput = document.getElementById("jitterStrength");
 		const menuStopMotionInput = document.getElementById("menuStopMotion");
+		const menuTouchControlsInput = document.getElementById("menuTouchControls");
 		const hudStopMotionInput = document.getElementById("hudStopMotion");
+		const helpText = document.getElementById("helpText");
+		const touchControls = document.getElementById("touchControls");
+		const touchJoystick = document.getElementById("touchJoystick");
+		const touchKnob = document.getElementById("touchKnob");
+		const touchSplitButton = document.getElementById("touchSplitButton");
+		const touchEjectButton = document.getElementById("touchEjectButton");
+		const touchDashButton = document.getElementById("touchDashButton");
+		const touchPauseButton = document.getElementById("touchPauseButton");
 		const botCountLabel = document.getElementById("botCountLabel");
 		const foodCountLabel = document.getElementById("foodCountLabel");
 		const visualFpsLabel = document.getElementById("visualFpsLabel");
@@ -419,6 +496,7 @@
 		const toast = document.getElementById("toast");
 
 		const TAU = Math.PI * 2;
+		const isTouchDevice = matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0 || "ontouchstart" in window;
 		const pastelPalette = ["#eaa6ad", "#f0c983", "#b8d8ba", "#a9c8d8", "#d8b7dd", "#f2b8a0", "#b7d7cf", "#e7d99f", "#c6bedf", "#f1c4d6", "#a8cfa6", "#d7b98e", "#a8badb", "#e9b8a6", "#c8d6a1"];
 		const foodPalette = ["#f2b6bd", "#f7d78e", "#bfe2c4", "#b8d7e6", "#d7c2e4", "#f4c3a6", "#c4e0dc", "#efe3ad", "#e4c4cf"];
 		const botBaseNames = ["Amora", "Nuvem", "Limo", "Dália", "Goma", "Pingo", "Fubá", "Luna", "Chá", "Bolha", "Caju", "Tinta", "Pêssego", "Naná", "Mimo", "Folha", "Algodão", "Biscoito", "Jade", "Avelã", "Manga", "Flor", "Céu", "Trigo"];
@@ -499,6 +577,19 @@
 			}
 		};
 
+		const coreRules = {
+			minSplitMass: 720,
+			maxPlayerParts: 10,
+			splitCooldown: .35,
+			mergeDelay: 8.5,
+			ejectCooldown: .16,
+			ejectCost: 115,
+			dashCooldown: 2.2,
+			dashCost: 170,
+			spawnShieldSeconds: 3.0,
+			giantDecayRadius: 82
+		};
+
 		const config = {
 			arenaSize: 5200,
 			botTarget: 25,
@@ -508,19 +599,24 @@
 			jitterStrength: 1.6,
 			cameraSmooth: 7.5,
 			playerName: "Você",
+			touchControls: isTouchDevice,
 			mode: "classic",
 			custom: {
 				special: false,
 				vines: false,
 				trails: false,
-				events: false
+				events: false,
+				powerups: false,
+				zones: false
 			},
 			draftMode: "classic",
 			draftCustom: {
 				special: false,
 				vines: false,
 				trails: false,
-				events: false
+				events: false,
+				powerups: false,
+				zones: false
 			}
 		};
 
@@ -542,12 +638,15 @@
 			stats: null,
 			vines: { centerX: 2600, centerY: 2600, startRadius: 2450, currentRadius: 2450, finalRadius: 760, shrinkDelay: 12, shrinkDuration: 270, pulse: 0 },
 			trails: [],
+			viruses: [],
 			powerups: [],
 			decoys: [],
 			zones: [],
 			nextPowerupSpawnAt: 0,
 			nextZoneBurstAt: 0,
 			eventState: { active: null, nextAt: 0, until: 0, pulse: 0, windX: 0, windY: 0, spots: [], lastBurstAt: 0 },
+			actions: { lastSplitAt: -99, lastEjectAt: -99, lastDashAt: -99 },
+			touch: { active: false, pointerId: null, dx: 0, dy: 0, normX: 0, normY: 0, maxDistance: 42 },
 			input: { screenX: innerWidth / 2, screenY: innerHeight / 2, worldX: 0, worldY: 0, hasPointer: false },
 			camera: { x: 2600, y: 2600, zoom: .8 }
 		};
@@ -577,6 +676,19 @@
 			return modeInfo[mode] || modeInfo.classic;
 		}
 
+		function isPlayerCell(cell) { return cell && cell.alive && cell.type === "player"; }
+		function getPlayerCells() { return state.cells.filter(isPlayerCell); }
+		function getPlayerTotalMass() { return getPlayerCells().reduce((sum, c) => sum + c.mass, 0); }
+		function getPlayerFocus() {
+			const parts = getPlayerCells();
+			if (!parts.length) return state.player || { x: state.camera.x, y: state.camera.y, radius: 24, mass: 0, alive: false };
+			let mass = 0, x = 0, y = 0, largest = parts[0];
+			for (const part of parts) { mass += part.mass; x += part.x * part.mass; y += part.y * part.mass; if (part.mass > largest.mass) largest = part; }
+			state.player = largest;
+			return { x: x / mass, y: y / mass, radius: Math.sqrt(mass), mass, alive: true };
+		}
+		function sameTeam(a, b) { return a && b && a.teamId && b.teamId && a.teamId === b.teamId; }
+
 		class Cell {
 			constructor({ x, y, radius, color, name, type, personality = null }) {
 				this.id = state.idSeq++;
@@ -586,7 +698,9 @@
 				this.alive = true; this.seed = Math.random() * 10000;
 				this.wanderX = x; this.wanderY = y; this.nextThink = 0;
 				this.mood = "calmo"; this.moodStrength = 0; this.moodUntil = 0; this.rewardUntil = 0; this.lastAteAt = 0;
-				this.effects = { speedUntil: 0, shieldUntil: 0, inkUntil: 0, slowUntil: 0, paintBoostUntil: 0, watercolorUntil: 0, glueUntil: 0, zoneUntil: 0 };
+				this.effects = { speedUntil: 0, shieldUntil: 0, inkUntil: 0, slowUntil: 0, paintBoostUntil: 0, watercolorUntil: 0, glueUntil: 0, zoneUntil: 0, spawnShieldUntil: 0, dashUntil: 0, virusSafeUntil: 0 };
+				this.teamId = type === "player" ? "player" : `cell:${this.id}`;
+				this.mergeUnlockAt = 0;
 				this.nextTrailAt = 0;
 				this.visual = { x, y, radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
 			}
@@ -611,8 +725,18 @@
 			keepInsideArena() {
 				const min = this.radius + 8;
 				const max = config.arenaSize - this.radius - 8;
-				if (this.x < min) { this.x = min; this.vx *= -.25; } else if (this.x > max) { this.x = max; this.vx *= -.25; }
-				if (this.y < min) { this.y = min; this.vy *= -.25; } else if (this.y > max) { this.y = max; this.vy *= -.25; }
+				const cushion = 120;
+				let pushX = 0, pushY = 0;
+				if (this.x < min + cushion) pushX += (min + cushion - this.x) / cushion;
+				if (this.x > max - cushion) pushX -= (this.x - (max - cushion)) / cushion;
+				if (this.y < min + cushion) pushY += (min + cushion - this.y) / cushion;
+				if (this.y > max - cushion) pushY -= (this.y - (max - cushion)) / cushion;
+				this.vx += pushX * 18;
+				this.vy += pushY * 18;
+				if (this.x < min) { this.x = min; this.vx = Math.max(this.vx, 40); }
+				else if (this.x > max) { this.x = max; this.vx = Math.min(this.vx, -40); }
+				if (this.y < min) { this.y = min; this.vy = Math.max(this.vy, 40); }
+				else if (this.y > max) { this.y = max; this.vy = Math.min(this.vy, -40); }
 			}
 		}
 
@@ -630,10 +754,20 @@
 					this.color = pick(foodPalette);
 				}
 				this.seed = Math.random() * 10000; this.alive = true;
+				this.vx = 0; this.vy = 0; this.isEjected = false; this.ejectedBy = null; this.pickupDelayUntil = 0; this.life = Infinity;
 				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
 			}
 		}
 
+
+		class Virus {
+			constructor(x, y) {
+				this.id = state.idSeq++;
+				this.x = x; this.y = y; this.radius = rand(38, 52); this.mass = this.radius * this.radius;
+				this.color = "#9fcf8a"; this.seed = Math.random() * 10000; this.alive = true; this.feed = 0;
+				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+			}
+		}
 
 		class PowerUp {
 			constructor(x, y, type = null) {
@@ -698,6 +832,41 @@
 			}
 		}
 
+		function spawnVirus(x = rand(160, config.arenaSize - 160), y = rand(160, config.arenaSize - 160)) {
+			if (state.viruses.length > 32) return;
+			for (let tries = 0; tries < 12; tries++) {
+				let tooClose = false;
+				for (const virus of state.viruses) if (distSq(x, y, virus.x, virus.y) < 260 * 260) { tooClose = true; break; }
+				if (!tooClose) break;
+				x = rand(160, config.arenaSize - 160); y = rand(160, config.arenaSize - 160);
+			}
+			state.viruses.push(new Virus(x, y));
+		}
+
+		function spawnFoodPellet(x, y, mass, color = null, velocity = null, ejectedBy = null) {
+			const f = new Food(clamp(x, 45, config.arenaSize - 45), clamp(y, 45, config.arenaSize - 45), null);
+			f.mass = Math.max(20, mass);
+			f.radius = clamp(Math.sqrt(f.mass) * .52, 4.5, 12);
+			f.color = color || pick(foodPalette);
+			f.isEjected = !!velocity;
+			f.ejectedBy = ejectedBy;
+			f.pickupDelayUntil = state.time + (velocity ? .36 : .06);
+			f.life = velocity ? 18 : rand(14, 24);
+			if (velocity) { f.vx = velocity.x; f.vy = velocity.y; }
+			state.foods.push(f);
+			return f;
+		}
+
+		function splatterMass(x, y, mass, color = null, count = 18) {
+			const total = Math.max(80, mass);
+			const pieces = clamp(Math.floor(count), 4, 40);
+			for (let i = 0; i < pieces; i++) {
+				const a = rand(0, TAU);
+				const d = rand(12, 90);
+				spawnFoodPellet(x + Math.cos(a) * d, y + Math.sin(a) * d, total / pieces * rand(.65, 1.25), color, { x: Math.cos(a) * rand(70, 230), y: Math.sin(a) * rand(70, 230) }, null);
+			}
+		}
+
 		function choosePowerUpType() {
 			const keys = Object.keys(powerupTypes);
 			let total = 0;
@@ -724,16 +893,16 @@
 				color: pick(pastelPalette), name: `${pick(botBaseNames)}, ${personality.label}`, type: "bot", personality
 			});
 			bot.mass *= personality.key === "giant" ? rand(1.25, 1.7) : rand(.82, 1.35);
-			bot.refreshRadius(); state.cells.push(bot);
+			bot.refreshRadius(); bot.teamId = `bot:${bot.id}`; bot.effects.spawnShieldUntil = state.time + 1.8; state.cells.push(bot);
 		}
 
 		function spawnPlayer() {
 			const player = new Cell({ x: config.arenaSize / 2 + rand(-120, 120), y: config.arenaSize / 2 + rand(-120, 120), radius: 26, color: "#9fd6cf", name: config.playerName, type: "player" });
-			state.player = player; state.cells.push(player);
+			player.teamId = "player"; player.effects.spawnShieldUntil = state.time + coreRules.spawnShieldSeconds; state.player = player; state.cells.push(player);
 		}
 
 		function makeStats() {
-			return { foodsEaten: 0, specialEaten: 0, powerupsEaten: 0, botsEaten: 0, trailBoostSeconds: 0, eventSurviveSeconds: 0, zoneSeconds: 0, top5Seconds: 0, escapeSeconds: 0, missionsCompleted: 0, playerThreatNear: false, playerRank: 1, toastUntil: 0 };
+			return { foodsEaten: 0, specialEaten: 0, powerupsEaten: 0, botsEaten: 0, trailBoostSeconds: 0, eventSurviveSeconds: 0, zoneSeconds: 0, top5Seconds: 0, escapeSeconds: 0, missionsCompleted: 0, playerThreatNear: false, splits: 0, ejected: 0, dashes: 0, playerRank: 1, toastUntil: 0 };
 		}
 
 		function makeMission() {
@@ -865,6 +1034,54 @@
 			foodCountLabel.textContent = foodCountInput.value;
 			visualFpsLabel.textContent = visualFpsInput.value;
 			jitterLabel.textContent = Number(jitterStrengthInput.value).toFixed(1);
+			if (menuTouchControlsInput) menuTouchControlsInput.checked = config.touchControls;
+		}
+
+		
+		function resetTouchJoystick() {
+			state.touch.active = false;
+			state.touch.pointerId = null;
+			state.touch.dx = 0; state.touch.dy = 0; state.touch.normX = 0; state.touch.normY = 0;
+			if (touchKnob) touchKnob.style.transform = `translate(-50%, -50%)`;
+			if (touchJoystick) touchJoystick.dataset.active = "0";
+		}
+
+		function updateTouchJoystickVisual() {
+			if (!touchKnob || !touchJoystick) return;
+			touchJoystick.dataset.active = state.touch.active ? "1" : "0";
+			touchKnob.style.transform = `translate(calc(-50% + ${state.touch.dx}px), calc(-50% + ${state.touch.dy}px))`;
+		}
+
+		function updateTouchJoystickFromClient(clientX, clientY) {
+			const rect = touchJoystick.getBoundingClientRect();
+			const cx = rect.left + rect.width / 2;
+			const cy = rect.top + rect.height / 2;
+			let dx = clientX - cx;
+			let dy = clientY - cy;
+			const maxDistance = rect.width * 0.29;
+			const d = Math.hypot(dx, dy);
+			state.touch.maxDistance = maxDistance;
+			if (d > maxDistance && d > 0) { dx = dx / d * maxDistance; dy = dy / d * maxDistance; }
+			state.touch.active = true;
+			state.touch.dx = dx; state.touch.dy = dy;
+			state.touch.normX = clamp(dx / maxDistance, -1, 1);
+			state.touch.normY = clamp(dy / maxDistance, -1, 1);
+			updateTouchJoystickVisual();
+		}
+
+		function updateTouchUIVisibility() {
+			const visible = state.mode === "playing" && config.touchControls;
+			if (touchControls) {
+				touchControls.classList.toggle("active", visible);
+				touchControls.setAttribute("aria-hidden", visible ? "false" : "true");
+			}
+			if (helpText) helpText.textContent = visible
+				? "joystick move · dividir · ejetar · dash · pausa"
+				: "mouse move · Espaço divide · W ejeta · Shift dash · P pausa · ESC menu";
+		}
+
+		function pulseTouchFeedback(ms = 10) {
+			if (navigator.vibrate) navigator.vibrate(ms);
 		}
 
 		function setMenuValues({ bots, foods, stopMotion, fps, jitter, mode, custom }) {
@@ -896,33 +1113,45 @@
 		function resetGame() {
 			state.mode = "playing"; state.paused = false; state.cells = []; state.foods = []; state.idSeq = 1;
 			state.trails = [];
+			state.viruses = [];
 			state.powerups = [];
 			state.decoys = [];
 			state.zones = zoneTemplates.map(z => ({ ...z }));
 			state.nextPowerupSpawnAt = 3.5;
 			state.nextZoneBurstAt = 1.5;
+			state.actions = { lastSplitAt: -99, lastEjectAt: -99, lastDashAt: -99 };
 			state.eventState = { active: null, nextAt: 18, until: 0, pulse: 0, windX: 0, windY: 0, spots: [], lastBurstAt: 0 };
 			state.runTime = 0; state.nextVisualTick = 0; state.nextHudTick = 0; state.nextBotRespawnTick = 0;
 			state.stats = makeStats(); resetVines();
 			config.botTarget = Number(botCountInput.value); config.foodTarget = Number(foodCountInput.value);
 			config.stopMotion = menuStopMotionInput.checked; config.visualStepFps = Number(visualFpsInput.value); config.jitterStrength = Number(jitterStrengthInput.value);
+			config.touchControls = menuTouchControlsInput.checked;
 			hudStopMotionInput.checked = config.stopMotion;
-			spawnPlayer(); for (let i = 0; i < config.botTarget; i++) spawnBot(); spawnFood(config.foodTarget);
+			resetTouchJoystick();
+			updateTouchUIVisibility();
+			spawnPlayer(); for (let i = 0; i < config.botTarget; i++) spawnBot(); spawnFood(config.foodTarget); for (let i = 0; i < 22; i++) spawnVirus();
 			state.mission = makeMission(); state.camera.x = state.player.x; state.camera.y = state.player.y; state.camera.zoom = .88;
 			mainMenu.classList.remove("active"); gameOverMenu.classList.remove("active"); hud.classList.add("active"); updateHud(true);
 		}
 
-		function showMainMenu() { state.mode = "menu"; state.paused = false; mainMenu.classList.add("active"); gameOverMenu.classList.remove("active"); hud.classList.remove("active"); }
+		function showMainMenu() { state.mode = "menu"; state.paused = false; resetTouchJoystick(); mainMenu.classList.add("active"); gameOverMenu.classList.remove("active"); hud.classList.remove("active"); updateTouchUIVisibility(); }
 		function showGameOver(killerName) {
 			if (state.mode === "gameover") return;
-			state.mode = "gameover"; hud.classList.remove("active"); gameOverMenu.classList.add("active");
+			state.mode = "gameover"; resetTouchJoystick(); hud.classList.remove("active"); gameOverMenu.classList.add("active"); updateTouchUIVisibility();
 			const mass = state.player ? Math.round(state.player.mass / 10) : 0;
 			const completed = state.stats ? state.stats.missionsCompleted : 0;
 			gameOverText.textContent = killerName ? `${killerName} absorveu você. Massa final: ${mass}. Missões completas: ${completed}.` : `Você desapareceu no mapa. Massa final: ${mass}. Missões completas: ${completed}.`;
 		}
 
 		function screenToWorld(x, y) { return { x: state.camera.x + (x - innerWidth / 2) / state.camera.zoom, y: state.camera.y + (y - innerHeight / 2) / state.camera.zoom }; }
-		function updateInputWorld() { const p = screenToWorld(state.input.screenX, state.input.screenY); state.input.worldX = p.x; state.input.worldY = p.y; }
+		function updateInputWorld() {
+			if (config.touchControls && state.touch.active && state.player) {
+				state.input.worldX = state.player.x + state.touch.normX * 420;
+				state.input.worldY = state.player.y + state.touch.normY * 420;
+				return;
+			}
+			const p = screenToWorld(state.input.screenX, state.input.screenY); state.input.worldX = p.x; state.input.worldY = p.y;
+		}
 
 		function isInsideSafeZone(cell) {
 			const dx = cell.x - state.vines.centerX; const dy = cell.y - state.vines.centerY;
@@ -1273,21 +1502,119 @@
 			}
 		}
 
-		function updatePlayer(dt) {
-			const p = state.player; if (!p || !p.alive) return;
+		function splitCell(cell, angle, splitMassRatio = .5, speed = 520, mergeDelay = coreRules.mergeDelay) {
+			if (!cell.alive || cell.mass < coreRules.minSplitMass) return null;
+			const newMass = cell.mass * splitMassRatio;
+			cell.mass -= newMass;
+			cell.refreshRadius();
+			const part = new Cell({
+				x: cell.x + Math.cos(angle) * (cell.radius + Math.sqrt(newMass) * .55),
+				y: cell.y + Math.sin(angle) * (cell.radius + Math.sqrt(newMass) * .55),
+				radius: Math.sqrt(newMass),
+				color: cell.color,
+				name: cell.name,
+				type: cell.type,
+				personality: cell.personality
+			});
+			part.teamId = cell.teamId;
+			part.mergeUnlockAt = state.time + mergeDelay;
+			cell.mergeUnlockAt = Math.max(cell.mergeUnlockAt, state.time + mergeDelay);
+			part.vx = cell.vx * .35 + Math.cos(angle) * speed;
+			part.vy = cell.vy * .35 + Math.sin(angle) * speed;
+			part.effects.spawnShieldUntil = Math.min(cell.effects.spawnShieldUntil, state.time + .25);
+			state.cells.push(part);
+			return part;
+		}
+
+		function splitPlayer() {
+			if (state.mode !== "playing" || state.paused || state.time - state.actions.lastSplitAt < coreRules.splitCooldown) return;
 			updateInputWorld();
-			if (p.effects.inkUntil > state.time) {
-				const wobble = Math.sin(state.time * 6) * 60;
-				p.moveToward(state.input.worldX + wobble, state.input.worldY - wobble * .7, dt, .92);
-			} else if (state.input.hasPointer) p.moveToward(state.input.worldX, state.input.worldY, dt, 1);
-			else { p.vx *= Math.exp(-dt * 5); p.vy *= Math.exp(-dt * 5); p.x += p.vx * dt; p.y += p.vy * dt; p.keepInsideArena(); }
-			updatePlayerMood(p);
+			const focus = getPlayerFocus();
+			const dir = norm(state.input.worldX - focus.x, state.input.worldY - focus.y);
+			const parts = getPlayerCells().filter(c => c.mass >= coreRules.minSplitMass).sort((a, b) => b.mass - a.mass);
+			let slots = coreRules.maxPlayerParts - getPlayerCells().length;
+			let made = 0;
+			for (const part of parts) {
+				if (slots <= 0) break;
+				if (splitCell(part, Math.atan2(dir.y, dir.x), .5, 560, coreRules.mergeDelay)) { made++; slots--; }
+			}
+			if (made) { state.actions.lastSplitAt = state.time; state.stats.splits += made; showToast(`Dividiu em ${getPlayerCells().length} partes.`); }
+		}
+
+		function ejectMass() {
+			if (state.mode !== "playing" || state.paused || state.time - state.actions.lastEjectAt < coreRules.ejectCooldown) return;
+			updateInputWorld();
+			const part = getPlayerCells().sort((a, b) => b.mass - a.mass)[0];
+			if (!part || part.mass < coreRules.ejectCost + 260) return;
+			const dir = norm(state.input.worldX - part.x, state.input.worldY - part.y);
+			part.addMass(-coreRules.ejectCost);
+			const sx = part.x + dir.x * (part.radius + 18);
+			const sy = part.y + dir.y * (part.radius + 18);
+			spawnFoodPellet(sx, sy, coreRules.ejectCost * .72, "#d6f0c3", { x: dir.x * 520 + part.vx * .25, y: dir.y * 520 + part.vy * .25 }, part.teamId);
+			part.vx -= dir.x * 26; part.vy -= dir.y * 26;
+			state.actions.lastEjectAt = state.time; state.stats.ejected++;
+		}
+
+		function dashPlayer() {
+			if (state.mode !== "playing" || state.paused || state.time - state.actions.lastDashAt < coreRules.dashCooldown) return;
+			updateInputWorld();
+			const focus = getPlayerFocus();
+			const dir = norm(state.input.worldX - focus.x, state.input.worldY - focus.y);
+			let dashed = false;
+			for (const part of getPlayerCells()) {
+				if (part.mass < coreRules.dashCost + 240) continue;
+				part.addMass(-coreRules.dashCost / Math.max(1, getPlayerCells().length));
+				part.vx += dir.x * 430; part.vy += dir.y * 430;
+				part.effects.dashUntil = Math.max(part.effects.dashUntil, state.time + .45);
+				dashed = true;
+			}
+			if (dashed) { state.actions.lastDashAt = state.time; state.stats.dashes++; showToast("Dash: impulso curto gastando massa."); }
+		}
+
+		function mergePlayerParts() {
+			const parts = getPlayerCells().sort((a, b) => b.mass - a.mass);
+			for (let i = 0; i < parts.length; i++) {
+				const a = parts[i]; if (!a.alive || state.time < a.mergeUnlockAt) continue;
+				for (let j = i + 1; j < parts.length; j++) {
+					const b = parts[j]; if (!b.alive || state.time < b.mergeUnlockAt) continue;
+					const reach = Math.max(a.radius, b.radius) * .72;
+					if (distSq(a.x, a.y, b.x, b.y) <= reach * reach) {
+						a.mass += b.mass; a.refreshRadius(); b.alive = false;
+						a.vx = (a.vx + b.vx) * .42; a.vy = (a.vy + b.vy) * .42;
+						setMood(a, "feliz", .65, .35);
+					}
+				}
+			}
+			state.cells = state.cells.filter(c => c.alive);
+			checkPlayerAlive();
+		}
+
+		function updatePlayer(dt) {
+			const parts = getPlayerCells();
+			if (!parts.length) { showGameOver("a arena"); return; }
+			updateInputWorld();
+			for (let index = 0; index < parts.length; index++) {
+				const p = parts[index];
+				const spreadAngle = parts.length > 1 ? index / parts.length * TAU + state.time * .25 : 0;
+				const spread = parts.length > 1 && state.time < p.mergeUnlockAt ? Math.min(95, p.radius * 1.7) : 0;
+				let tx = state.input.worldX + Math.cos(spreadAngle) * spread;
+				let ty = state.input.worldY + Math.sin(spreadAngle) * spread;
+				if (p.effects.inkUntil > state.time) {
+					const wobble = Math.sin(state.time * 6 + p.seed) * 60;
+					tx += wobble; ty -= wobble * .7;
+				}
+				const touchMoving = config.touchControls && state.touch.active;
+				if (touchMoving || state.input.hasPointer) p.moveToward(tx, ty, dt, 1);
+				else { p.vx *= Math.exp(-dt * 5); p.vy *= Math.exp(-dt * 5); p.x += p.vx * dt; p.y += p.vy * dt; p.keepInsideArena(); }
+				updatePlayerMood(p);
+			}
+			state.player = parts.sort((a, b) => b.mass - a.mass)[0];
 		}
 
 		function updatePlayerMood(player) {
 			let threatNear = false; let preyNear = false; let closestThreatD2 = Infinity;
 			for (const other of state.cells) {
-				if (!other.alive || other === player) continue;
+				if (!other.alive || other === player || sameTeam(player, other)) continue;
 				const d2 = distSq(player.x, player.y, other.x, other.y);
 				if (other.radius > player.radius * 1.18 && d2 < 520 * 520) { threatNear = true; closestThreatD2 = Math.min(closestThreatD2, d2); }
 				if (player.radius > other.radius * 1.24 && d2 < 360 * 360) preyNear = true;
@@ -1373,6 +1700,105 @@
 			}
 		}
 
+		function updateEjectedFood(dt) {
+			for (let i = state.foods.length - 1; i >= 0; i--) {
+				const f = state.foods[i];
+				if (Number.isFinite(f.life)) {
+					f.life -= dt;
+					if (f.life <= 0) { state.foods.splice(i, 1); continue; }
+				}
+				if (!f.isEjected) continue;
+				f.x += f.vx * dt; f.y += f.vy * dt;
+				f.vx *= Math.exp(-dt * 2.2); f.vy *= Math.exp(-dt * 2.2);
+				f.x = clamp(f.x, 32, config.arenaSize - 32); f.y = clamp(f.y, 32, config.arenaSize - 32);
+			}
+		}
+
+		function feedVirus(virus, food) {
+			virus.feed += food.mass;
+			virus.radius = clamp(virus.radius + food.mass * .0022, 36, 72);
+			virus.mass = virus.radius * virus.radius;
+			virus.visual.pulse = 1;
+			if (virus.feed > 520) {
+				virus.feed = 0; virus.radius = Math.max(42, virus.radius * .88); virus.mass = virus.radius * virus.radius;
+				const a = rand(0, TAU);
+				spawnVirus(clamp(virus.x + Math.cos(a) * rand(260, 460), 120, config.arenaSize - 120), clamp(virus.y + Math.sin(a) * rand(260, 460), 120, config.arenaSize - 120));
+				showToast("Um vírus nasceu da massa ejetada.");
+			}
+		}
+
+		function explodeOnVirus(cell, virus) {
+			if (!cell.alive || cell.effects.virusSafeUntil > state.time || cell.radius < virus.radius * .82 || cell.mass < 900) return;
+			const totalBefore = cell.mass;
+			const pieces = clamp(Math.floor(cell.radius / 18), 3, cell.type === "player" ? coreRules.maxPlayerParts : 7);
+			const existingPlayerParts = cell.type === "player" ? getPlayerCells().length : 1;
+			const allowedPieces = cell.type === "player" ? Math.max(2, coreRules.maxPlayerParts - existingPlayerParts + 1) : pieces;
+			const finalPieces = Math.max(2, Math.min(pieces, allowedPieces));
+			const keptMass = totalBefore * .72;
+			const partMass = keptMass / finalPieces;
+			cell.mass = partMass; cell.refreshRadius(); cell.mergeUnlockAt = state.time + coreRules.mergeDelay + 2.5;
+			cell.effects.virusSafeUntil = state.time + 1.6;
+			for (let i = 1; i < finalPieces; i++) {
+				const a = i / finalPieces * TAU + rand(-.25, .25);
+				const part = new Cell({
+					x: cell.x + Math.cos(a) * (cell.radius + 20),
+					y: cell.y + Math.sin(a) * (cell.radius + 20),
+					radius: Math.sqrt(partMass),
+					color: cell.color,
+					name: cell.name,
+					type: cell.type,
+					personality: cell.personality
+				});
+				part.mass = partMass; part.refreshRadius(); part.teamId = cell.teamId;
+				part.mergeUnlockAt = state.time + coreRules.mergeDelay + 2.5;
+				part.effects.virusSafeUntil = state.time + 1.6;
+				part.vx = cell.vx * .25 + Math.cos(a) * rand(380, 660);
+				part.vy = cell.vy * .25 + Math.sin(a) * rand(380, 660);
+				state.cells.push(part);
+			}
+			splatterMass(cell.x, cell.y, totalBefore * .18, cell.color, 18);
+			cell.effects.slowUntil = Math.max(cell.effects.slowUntil, state.time + 1.2);
+			setMood(cell, "assustado", 1.4, 1.1);
+			if (cell.type === "player") showToast("Vírus! Você explodiu em várias partes.");
+		}
+
+		function updateViruses(dt) {
+			while (state.viruses.length < 18) spawnVirus();
+			for (const virus of state.viruses) {
+				virus.visual.x = virus.x; virus.visual.y = virus.y; virus.visual.radius = virus.radius;
+				for (let i = state.foods.length - 1; i >= 0; i--) {
+					const food = state.foods[i];
+					if (!food.isEjected) continue;
+					const reach = virus.radius + food.radius;
+					if (distSq(virus.x, virus.y, food.x, food.y) <= reach * reach) {
+						feedVirus(virus, food);
+						state.foods.splice(i, 1);
+					}
+				}
+				for (const cell of state.cells) {
+					if (!cell.alive || cell.effects.virusSafeUntil > state.time) continue;
+					const reach = cell.radius + virus.radius * .62;
+					if (distSq(cell.x, cell.y, virus.x, virus.y) <= reach * reach) {
+						if (cell.radius > virus.radius * .9) explodeOnVirus(cell, virus);
+						else { const away = norm(cell.x - virus.x, cell.y - virus.y); cell.vx += away.x * 80 * dt; cell.vy += away.y * 80 * dt; }
+					}
+				}
+			}
+		}
+
+		function updateMassDecay(dt) {
+			for (const cell of state.cells) {
+				if (!cell.alive || cell.radius < coreRules.giantDecayRadius) continue;
+				const excess = cell.radius - coreRules.giantDecayRadius;
+				cell.addMass(-excess * excess * .018 * dt);
+			}
+		}
+
+		function checkPlayerAlive() {
+			if (state.mode !== "playing") return;
+			if (getPlayerCells().length === 0) showGameOver("a arena");
+		}
+
 		function applySpecialFood(cell, food) {
 			if (!food.special) return;
 			const type = food.special;
@@ -1391,6 +1817,7 @@
 				if (!cell.alive) continue;
 				for (let i = state.foods.length - 1; i >= 0; i--) {
 					const food = state.foods[i]; if (!food.alive) continue;
+					if (food.pickupDelayUntil > state.time && food.ejectedBy === cell.teamId) continue;
 					const eatDistance = cell.radius + food.radius * .58;
 					if (distSq(cell.x, cell.y, food.x, food.y) <= eatDistance * eatDistance) {
 						cell.addMass(food.mass); cell.lastAteAt = state.time; setMood(cell, "feliz", .75, .28);
@@ -1405,6 +1832,8 @@
 		}
 
 		function canEat(eater, prey) {
+			if (sameTeam(eater, prey)) return false;
+			if (prey.effects.spawnShieldUntil > state.time) return false;
 			const shielded = prey.effects.shieldUntil > state.time;
 			const needed = shielded ? 1.45 : 1.18;
 			return eater.radius > prey.radius * needed;
@@ -1416,9 +1845,10 @@
 			const centerLimit = eater.radius - prey.radius * (prey.effects.shieldUntil > state.time ? .04 : .18);
 			if (centerLimit <= 0) return false;
 			if (distSq(eater.x, eater.y, prey.x, prey.y) < centerLimit * centerLimit) {
-				eater.addMass(prey.mass * .86); eater.lastAteAt = state.time; setMood(eater, "feliz", 1.15, .7); prey.alive = false;
+				eater.addMass(prey.mass * .78); eater.lastAteAt = state.time; setMood(eater, "feliz", 1.15, .7);
+				splatterMass(prey.x, prey.y, prey.mass * .18, prey.color, clamp(Math.floor(prey.radius / 3), 8, 26));
+				prey.alive = false;
 				if (eater.type === "player" && prey.type === "bot") state.stats.botsEaten++;
-				if (prey.type === "player") showGameOver(eater.name);
 				return true;
 			}
 			return false;
@@ -1430,18 +1860,20 @@
 				const a = alive[i]; const b = alive[j];
 				if (a.radius > b.radius) tryEatCell(a, b); else tryEatCell(b, a);
 			}
-			state.cells = state.cells.filter(c => c.alive || c.type === "player");
+			state.cells = state.cells.filter(c => c.alive);
+			checkPlayerAlive();
 		}
 
 		function updateRankStats() {
-			const sorted = state.cells.filter(c => c.alive).sort((a, b) => b.mass - a.mass);
-			state.stats.playerRank = sorted.findIndex(c => c === state.player) + 1 || 999;
+			const playerMass = getPlayerTotalMass();
+			const competitors = state.cells.filter(c => c.alive && c.type !== "player").map(c => c.mass);
+			state.stats.playerRank = 1 + competitors.filter(m => m > playerMass).length;
 		}
 
 		function updateCamera(dt) {
-			const p = state.player; if (!p) return;
-			const tx = p.alive ? p.x : state.camera.x; const ty = p.alive ? p.y : state.camera.y;
-			const targetZoom = clamp(1.05 - (p.radius - 24) * .0068, .34, 1.05);
+			const focus = getPlayerFocus();
+			const tx = focus.alive ? focus.x : state.camera.x; const ty = focus.alive ? focus.y : state.camera.y;
+			const targetZoom = clamp(1.05 - (focus.radius - 24) * .0044, .30, 1.05);
 			const t = 1 - Math.exp(-dt * config.cameraSmooth);
 			state.camera.x = lerp(state.camera.x, tx, t); state.camera.y = lerp(state.camera.y, ty, t); state.camera.zoom = lerp(state.camera.zoom, targetZoom, t * .85);
 		}
@@ -1458,7 +1890,7 @@
 		}
 
 		function updateVisualSnapshots(now) {
-			const all = [...state.foods, ...state.powerups, ...state.decoys, ...state.cells];
+			const all = [...state.foods, ...state.viruses, ...state.powerups, ...state.decoys, ...state.cells];
 			if (!config.stopMotion) {
 				for (const e of all) { e.visual.x = e.x; e.visual.y = e.y; e.visual.radius = e.radius; e.visual.jx = 0; e.visual.jy = 0; e.visual.squash = 1; e.visual.pulse = Math.max(0, e.visual.pulse - .1); }
 				return;
@@ -1479,10 +1911,12 @@
 		function updateHud(force = false) {
 			if (state.mode !== "playing") return;
 			const now = performance.now() / 1000; if (!force && now < state.nextHudTick) return; state.nextHudTick = now + .16;
-			const sorted = state.cells.filter(c => c.alive).sort((a, b) => b.mass - a.mass);
-			const p = state.player; const rank = sorted.findIndex(c => c === p) + 1; const mass = p ? Math.round(p.mass / 10) : 0;
+			const playerMass = getPlayerTotalMass();
+			const playerParts = getPlayerCells().length;
+			const sorted = [{ name: "Você", type: "player", mass: playerMass, personality: null, alive: playerMass > 0 }, ...state.cells.filter(c => c.alive && c.type !== "player")].sort((a, b) => b.mass - a.mass);
+			const rank = 1 + state.cells.filter(c => c.alive && c.type !== "player" && c.mass > playerMass).length; const mass = Math.round(playerMass / 10);
 			massText.textContent = `Massa ${mass}`;
-			rankText.textContent = p && p.alive ? `posição #${rank || "-"} · missões ${state.stats.missionsCompleted}` : "absorvido";
+			rankText.textContent = playerMass > 0 ? `posição #${rank || "-"} · partes ${playerParts} · missões ${state.stats.missionsCompleted}` : "absorvido";
 			const info = activeMode(); modeTitle.textContent = info.title;
 			if (info.events && state.eventState.active) {
 				const left = Math.max(0, Math.ceil(state.eventState.until - state.time));
@@ -1499,7 +1933,7 @@
 			else if (info.trails) modeText.textContent = `Rastros ativos: sua tinta dá impulso; tinta rival deixa o chão escorregadio.`;
 			else if (info.events) modeText.textContent = `Eventos vivos ativos. Próximo evento em breve.`;
 			else if (info.special) modeText.textContent = `Gotas especiais ativas: ouro, azul, verniz, verde e tinta preta.`;
-			else modeText.textContent = `Base ativa: bots com personalidade, humor, carinhas e mini-missões.`;
+			else modeText.textContent = `Base ativa: dividir, ejetar massa, vírus, dash, borda elástica, bots e mini-missões.`;
 
 			leaderboardRows.innerHTML = "";
 			for (let i = 0; i < Math.min(5, sorted.length); i++) {
@@ -1518,7 +1952,7 @@
 		function update(dt, now) {
 			if (state.mode !== "playing" || state.paused) { updateVisualSnapshots(now); updateToast(); return; }
 			state.runTime += dt;
-			updateEvents(dt); updateZones(dt); updatePlayer(dt); updateBots(dt, now); updateVines(dt); updateTrails(dt); updatePowerups(dt); updateDecoys(dt); handleFoodEating(); handleCellEating(); updateRankStats(); updateMission(dt); updateCamera(dt); updateVisualSnapshots(now); updateHud(false); updateToast();
+			updateEvents(dt); updateZones(dt); updatePlayer(dt); updateBots(dt, now); updateVines(dt); updateTrails(dt); updatePowerups(dt); updateDecoys(dt); updateEjectedFood(dt); updateViruses(dt); handleFoodEating(); handleCellEating(); mergePlayerParts(); updateMassDecay(dt); updateRankStats(); updateMission(dt); updateCamera(dt); updateVisualSnapshots(now); updateHud(false); updateToast();
 		}
 
 		function isVisible(x, y, radius) {
@@ -1539,6 +1973,7 @@
 		}
 
 		function moodTint(c) {
+			if (c.effects.spawnShieldUntil > state.time) return "rgba(255, 255, 255, .36)";
 			if (c.effects.shieldUntil > state.time) return "rgba(255, 188, 211, .35)";
 			if (c.effects.speedUntil > state.time) return "rgba(130, 202, 232, .30)";
 			if (c.effects.paintBoostUntil > state.time) return "rgba(255, 238, 168, .20)";
@@ -1584,9 +2019,9 @@
 			if (!isVisible(x, y, r)) return;
 			ctx.save(); ctx.translate(x, y); ctx.scale(v.squash || 1, 1 / (v.squash || 1)); ctx.translate(-x, -y);
 			ctx.beginPath(); ctx.ellipse(x + r * .08, y + r * .16, r * .9, r * .34, 0, 0, TAU); ctx.fillStyle = "rgba(80,55,35,.13)"; ctx.fill();
-			if (c.rewardUntil > state.time || c.effects.shieldUntil > state.time || c.effects.speedUntil > state.time || c.effects.paintBoostUntil > state.time) {
+			if (c.rewardUntil > state.time || c.effects.spawnShieldUntil > state.time || c.effects.shieldUntil > state.time || c.effects.speedUntil > state.time || c.effects.paintBoostUntil > state.time || c.effects.dashUntil > state.time) {
 				drawBlobPath(x, y, r + 12 + Math.sin(state.time * 8) * 2, c.seed + 9.2, .035);
-				ctx.fillStyle = c.effects.shieldUntil > state.time ? "rgba(255,188,211,.18)" : c.effects.speedUntil > state.time ? "rgba(130,202,232,.16)" : c.effects.paintBoostUntil > state.time ? "rgba(255,238,168,.14)" : "rgba(255,219,122,.16)"; ctx.fill();
+				ctx.fillStyle = c.effects.spawnShieldUntil > state.time ? "rgba(255,255,255,.22)" : c.effects.shieldUntil > state.time ? "rgba(255,188,211,.18)" : c.effects.speedUntil > state.time || c.effects.dashUntil > state.time ? "rgba(130,202,232,.16)" : c.effects.paintBoostUntil > state.time ? "rgba(255,238,168,.14)" : "rgba(255,219,122,.16)"; ctx.fill();
 			}
 			drawBlobPath(x, y, r + pulse, c.seed, .04); ctx.fillStyle = c.color; ctx.globalAlpha = .93; ctx.fill(); ctx.globalAlpha = 1;
 			ctx.save(); ctx.clip();
@@ -1596,6 +2031,25 @@
 			if (c.type === "player") { ctx.lineWidth = Math.max(2.4, r * .06); ctx.strokeStyle = "rgba(49,119,111,.45)"; drawBlobPath(x, y, r + 3.5 + pulse, c.seed + 8.2, .03); ctx.stroke(); }
 			drawFace(c, x, y, r);
 			if (r > 18) { ctx.font = `900 ${clamp(r * .27, 10, 16)}px ui-rounded, Segoe UI, system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,.66)"; ctx.fillStyle = "rgba(72,62,53,.72)"; ctx.strokeText(c.name, x, y + r * .74); ctx.fillText(c.name, x, y + r * .74); }
+			ctx.restore();
+		}
+
+		function drawVirus(v) {
+			const x = v.visual.x + (v.visual.jx || 0), y = v.visual.y + (v.visual.jy || 0), r = v.visual.radius;
+			if (!isVisible(x, y, r + 36)) return;
+			ctx.save();
+			ctx.beginPath();
+			const spikes = 22;
+			for (let i = 0; i <= spikes; i++) {
+				const a = i / spikes * TAU;
+				const rr = r * (i % 2 === 0 ? 1.18 : .82) + Math.sin(state.time * 3 + i + v.seed) * 2.2;
+				const px = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr;
+				if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+			}
+			ctx.closePath();
+			ctx.fillStyle = "rgba(159,207,138,.88)"; ctx.fill();
+			ctx.lineWidth = 3; ctx.strokeStyle = "rgba(73,116,65,.34)"; ctx.stroke();
+			ctx.beginPath(); ctx.arc(x - r * .18, y - r * .22, r * .36, 0, TAU); ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.fill();
 			ctx.restore();
 		}
 
@@ -1847,6 +2301,7 @@
 			ctx.save(); ctx.translate(innerWidth / 2, innerHeight / 2); ctx.scale(state.camera.zoom, state.camera.zoom); ctx.translate(-state.camera.x, -state.camera.y);
 			drawArenaBackground(); drawZones(); drawBattleVines(); drawEventOverlays(); drawTrails();
 			for (const f of state.foods) drawFood(f);
+			for (const v of state.viruses) drawVirus(v);
 			for (const p of state.powerups) drawPowerUp(p);
 			for (const d of state.decoys) drawDecoy(d);
 			for (const c of state.cells.filter(c => c.alive).sort((a, b) => a.radius - b.radius)) drawBlob(c);
@@ -1882,6 +2337,7 @@
 				for (const z of state.zones) { miniCtx.beginPath(); miniCtx.arc(pad + z.x * scale, pad + z.y * scale, z.r * scale, 0, TAU); miniCtx.fillStyle = z.color.replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/, "rgba($1,$2,$3,.18)"); miniCtx.fill(); }
 			}
 			if (activeMode().vines) { miniCtx.beginPath(); miniCtx.arc(pad + state.vines.centerX * scale, pad + state.vines.centerY * scale, state.vines.currentRadius * scale, 0, TAU); miniCtx.strokeStyle = "rgba(97,142,82,.72)"; miniCtx.lineWidth = 3; miniCtx.stroke(); }
+			for (const v of state.viruses) { miniCtx.beginPath(); miniCtx.arc(pad + v.x * scale, pad + v.y * scale, clamp(v.radius * scale, 2, 5), 0, TAU); miniCtx.fillStyle = "rgba(90,145,70,.62)"; miniCtx.fill(); }
 			for (const c of state.cells) { if (!c.alive) continue; miniCtx.beginPath(); miniCtx.arc(pad + c.x * scale, pad + c.y * scale, clamp(c.radius * scale, 2, 8), 0, TAU); miniCtx.fillStyle = c.type === "player" ? "#2f776f" : "rgba(92,76,57,.45)"; miniCtx.fill(); }
 		}
 
@@ -1898,14 +2354,41 @@
 
 		function togglePause() { if (state.mode !== "playing") return; state.paused = !state.paused; pauseButton.textContent = state.paused ? "Continuar" : "Pausar"; }
 		function bindEvents() {
-			addEventListener("resize", resize);
-			addEventListener("pointermove", e => { state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
-			addEventListener("pointerdown", e => { state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
+			addEventListener("resize", () => { resize(); updateTouchJoystickVisual(); });
+			addEventListener("pointermove", e => { if (config.touchControls && e.pointerType !== "mouse" && state.touch.active) return; state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
+			addEventListener("pointerdown", e => { if (config.touchControls && e.pointerType !== "mouse" && state.touch.active) return; state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
 			addEventListener("keydown", e => {
 				if (e.key === "Escape" && modeDialog.classList.contains("active")) { closeModeDialog(); return; }
+				if (e.code === "Space") { e.preventDefault(); splitPlayer(); return; }
+				if (e.key.toLowerCase() === "w") { e.preventDefault(); ejectMass(); return; }
+				if (e.key === "Shift") { e.preventDefault(); dashPlayer(); return; }
 				if (e.key.toLowerCase() === "p") togglePause();
 				if (e.key === "Escape" && state.mode === "playing") showMainMenu();
 			});
+
+			menuTouchControlsInput.addEventListener("change", () => { config.touchControls = menuTouchControlsInput.checked; updateTouchUIVisibility(); if (!config.touchControls) resetTouchJoystick(); });
+			touchJoystick.addEventListener("pointerdown", event => {
+				if (!config.touchControls) return;
+				event.preventDefault();
+				state.touch.pointerId = event.pointerId;
+				touchJoystick.setPointerCapture?.(event.pointerId);
+				updateTouchJoystickFromClient(event.clientX, event.clientY);
+			});
+			touchJoystick.addEventListener("pointermove", event => {
+				if (state.touch.pointerId !== event.pointerId) return;
+				event.preventDefault();
+				updateTouchJoystickFromClient(event.clientX, event.clientY);
+			});
+			const endTouchJoystick = event => {
+				if (state.touch.pointerId !== event.pointerId) return;
+				resetTouchJoystick();
+			};
+			touchJoystick.addEventListener("pointerup", endTouchJoystick);
+			touchJoystick.addEventListener("pointercancel", endTouchJoystick);
+			touchSplitButton.addEventListener("click", () => { pulseTouchFeedback(); splitPlayer(); });
+			touchEjectButton.addEventListener("click", () => { pulseTouchFeedback(); ejectMass(); });
+			touchDashButton.addEventListener("click", () => { pulseTouchFeedback(); dashPlayer(); });
+			touchPauseButton.addEventListener("click", () => { pulseTouchFeedback(8); togglePause(); });
 			openModeDialogButton.addEventListener("click", openModeDialog);
 			closeModeDialogButton.addEventListener("click", closeModeDialog);
 			cancelModeDialogButton.addEventListener("click", closeModeDialog);
@@ -1929,7 +2412,7 @@
 			jitterStrengthInput.addEventListener("input", () => { config.jitterStrength = Number(jitterStrengthInput.value); });
 		}
 
-		function boot() { resize(); createPaperPattern(); syncLabels(); refreshModeSummary(); refreshDialogModeDetails(); bindEvents(); requestAnimationFrame(loop); }
+		function boot() { config.touchControls = isTouchDevice; resize(); createPaperPattern(); syncLabels(); refreshModeSummary(); refreshDialogModeDetails(); updateTouchUIVisibility(); bindEvents(); requestAnimationFrame(loop); }
 		boot();
 	})();
 	</script>
