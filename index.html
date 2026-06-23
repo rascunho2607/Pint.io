@@ -1,0 +1,1937 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Pint.io — Seleção de Modos</title>
+	<style>
+		:root {
+			--paper: #f5ecd8;
+			--ink: #4f473e;
+			--muted: #786f64;
+			--panel: rgba(255, 249, 232, 0.82);
+			--stroke: rgba(91, 75, 57, 0.16);
+		}
+
+		* { box-sizing: border-box; user-select: none; }
+		html, body {
+			width: 100%; height: 100%; margin: 0; overflow: hidden;
+			font-family: ui-rounded, "Segoe UI", system-ui, sans-serif;
+			color: var(--ink);
+			background:
+				radial-gradient(circle at 18% 12%, rgba(255,255,255,.72), transparent 26%),
+				radial-gradient(circle at 82% 76%, rgba(232,205,155,.2), transparent 34%),
+				linear-gradient(135deg, #f7f0dd, #efe1c7);
+		}
+
+		canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+		.ui-layer { position: fixed; inset: 0; pointer-events: none; }
+
+		.overlay {
+			position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+			padding: 24px; pointer-events: auto;
+			background: radial-gradient(circle at 50% 44%, rgba(255,250,235,.58), rgba(235,221,190,.25));
+			backdrop-filter: blur(4px);
+		}
+		.overlay.active { display: flex; }
+
+		.card {
+			position: relative; width: min(880px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto;
+			padding: 34px; border: 1px solid var(--stroke); border-radius: 34px;
+			background: linear-gradient(145deg, rgba(255,250,233,.97), rgba(242,226,196,.91));
+			box-shadow: 0 22px 80px rgba(77,58,36,.22), inset 0 1px 0 rgba(255,255,255,.82);
+		}
+		.card::before, .card::after {
+			content: ""; position: absolute; width: 260px; height: 260px; border-radius: 50%; pointer-events: none; opacity: .45;
+		}
+		.card::before { left: -90px; top: -80px; background: radial-gradient(circle, rgba(169,200,216,.5), transparent 62%); }
+		.card::after { right: -85px; bottom: -95px; background: radial-gradient(circle, rgba(233,174,183,.44), transparent 64%); }
+
+		.vine { position: absolute; left: -20px; right: -20px; top: 0; height: 54px; opacity: .78; pointer-events: none; }
+		.vine svg { width: 100%; height: 100%; display: block; }
+
+		h1 {
+			position: relative; margin: 22px 0 8px; font-size: clamp(44px, 8vw, 84px); line-height: .95;
+			letter-spacing: -.08em; font-weight: 950; color: #51483e;
+			text-shadow: 2px 3px 0 rgba(255,255,255,.62), 0 10px 26px rgba(100,72,39,.16);
+		}
+		.subtitle { position: relative; max-width: 680px; margin: 0 0 20px; font-size: 16px; line-height: 1.55; color: var(--muted); }
+
+		.menu-topline { position: relative; display: flex; align-items: center; gap: 10px; margin: 4px 0 12px; color: #776b60; font-size: 13px; font-weight: 850; }
+		.soft-dot { width: 9px; height: 9px; border-radius: 999px; background: #9fd6cf; box-shadow: 0 0 0 5px rgba(159,214,207,.22); }
+		.mode-summary {
+			position: relative; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center;
+			padding: 16px; margin: 0 0 18px; border-radius: 28px; border: 1px solid rgba(80,65,45,.1);
+			background: linear-gradient(145deg, rgba(255,255,255,.52), rgba(255,255,255,.26));
+			box-shadow: inset 0 1px 0 rgba(255,255,255,.68);
+		}
+		.mode-kicker { margin-bottom: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: .13em; font-weight: 950; color: #8a7c6f; }
+		.selected-mode-title { font-size: 23px; line-height: 1.05; letter-spacing: -.04em; font-weight: 950; color: #443d36; }
+		.selected-mode-desc { margin-top: 7px; max-width: 560px; font-size: 13px; line-height: 1.45; font-weight: 760; color: #746a5f; }
+		.mode-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+		.tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 999px; background: rgba(255,255,255,.52); border: 1px solid rgba(80,65,45,.08); font-size: 11px; font-weight: 900; color: #62584e; }
+		.tag.on::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: #79b18f; }
+		.tag.off { opacity: .58; }
+		.select-mode-button { white-space: nowrap; background: linear-gradient(145deg, #dbecea, #b9d6d3); }
+
+		.modal-overlay {
+			position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 24px;
+			background: rgba(72, 57, 39, .18); backdrop-filter: blur(7px); pointer-events: auto; z-index: 20;
+		}
+		.modal-overlay.active { display: flex; }
+		.mode-dialog {
+			width: min(920px, calc(100vw - 30px)); max-height: min(760px, calc(100vh - 30px)); overflow: auto;
+			border-radius: 34px; border: 1px solid rgba(80,65,45,.12);
+			background: linear-gradient(145deg, rgba(255,250,235,.98), rgba(244,230,203,.96));
+			box-shadow: 0 28px 95px rgba(67, 48, 28, .28), inset 0 1px 0 rgba(255,255,255,.82);
+		}
+		.dialog-head { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; padding: 24px 24px 12px; }
+		.dialog-title { margin: 0; font-size: clamp(26px, 4vw, 42px); line-height: 1; letter-spacing: -.06em; font-weight: 950; color: #473f37; }
+		.dialog-subtitle { margin: 9px 0 0; max-width: 620px; color: #746a5f; font-size: 14px; line-height: 1.45; font-weight: 760; }
+		.close-button { padding: 9px 13px; background: rgba(255,255,255,.46); }
+		.mode-picker-layout { display: grid; grid-template-columns: minmax(260px, .9fr) minmax(320px, 1.1fr); gap: 16px; padding: 12px 24px 24px; }
+		.mode-option-list { display: grid; gap: 10px; }
+		.mode-option {
+			position: relative; width: 100%; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start;
+			padding: 14px; border-radius: 24px; border: 1px solid rgba(80,65,45,.1); background: rgba(255,255,255,.36);
+			text-align: left; box-shadow: none; cursor: pointer;
+		}
+		.mode-option:hover { transform: translateY(-1px); background: rgba(255,255,255,.52); }
+		.mode-option.active { border-color: rgba(47,119,111,.42); background: rgba(195,229,219,.42); box-shadow: inset 0 0 0 2px rgba(47,119,111,.12); }
+		.option-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 14px; background: rgba(255,255,255,.58); font-size: 18px; }
+		.option-title, .option-desc { display: block; }
+		.option-title { font-size: 15px; font-weight: 950; color: #4d453d; }
+		.option-desc { margin-top: 4px; font-size: 12px; line-height: 1.38; font-weight: 750; color: #746a5f; }
+		.mode-details { padding: 18px; border-radius: 28px; border: 1px solid rgba(80,65,45,.1); background: rgba(255,255,255,.34); }
+		.detail-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .13em; font-weight: 950; color: #85786b; }
+		.detail-title { margin-top: 6px; font-size: 25px; line-height: 1.05; letter-spacing: -.04em; font-weight: 950; color: #443d36; }
+		.detail-desc { margin-top: 8px; color: #70665b; font-size: 13px; line-height: 1.45; font-weight: 760; }
+		.mechanic-list { display: grid; gap: 10px; margin-top: 16px; }
+		.mechanic-card { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; padding: 13px; border-radius: 22px; background: rgba(255,255,255,.43); border: 1px solid rgba(80,65,45,.08); }
+		.mechanic-title { font-size: 13px; font-weight: 950; color: #51483f; }
+		.mechanic-desc { margin-top: 4px; font-size: 12px; line-height: 1.35; font-weight: 750; color: #786d62; }
+		.switch { position: relative; width: 48px; height: 28px; display: inline-block; }
+		.switch input { opacity: 0; width: 0; height: 0; }
+		.slider { position: absolute; inset: 0; border-radius: 999px; background: rgba(100,78,50,.18); transition: .18s ease; box-shadow: inset 0 1px 4px rgba(60,40,20,.14); }
+		.slider::before { content: ""; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; border-radius: 50%; background: #fff8e8; transition: .18s ease; box-shadow: 0 4px 12px rgba(70,50,28,.18); }
+		.switch input:checked + .slider { background: #8fbf9c; }
+		.switch input:checked + .slider::before { transform: translateX(20px); }
+		.switch input:disabled + .slider { opacity: .45; }
+		.always-on { font-size: 11px; font-weight: 950; color: #5f8d69; padding: 7px 9px; border-radius: 999px; background: rgba(143,191,156,.16); }
+		.locked-soon { font-size: 11px; font-weight: 950; color: #8a7c6f; padding: 7px 9px; border-radius: 999px; background: rgba(100,78,50,.08); }
+		.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 0 24px 24px; }
+
+		.grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+		.box { padding: 16px; border-radius: 22px; background: rgba(255,255,255,.33); border: 1px solid rgba(80,65,45,.1); }
+		.box label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; font-size: 13px; font-weight: 850; color: #5a5047; }
+		.box input[type="range"] { width: 100%; accent-color: #9fbfbb; }
+		.box input[type="checkbox"] { width: 19px; height: 19px; accent-color: #8fab83; }
+
+		.actions { position: relative; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+		button {
+			border: 0; border-radius: 999px; padding: 13px 19px; font-size: 15px; font-weight: 950; color: #473f36;
+			background: linear-gradient(145deg, #f6dca2, #e7c47a);
+			box-shadow: 0 9px 22px rgba(103,75,35,.18), inset 0 1px 0 rgba(255,255,255,.72);
+			cursor: pointer; transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+		}
+		button:hover { transform: translateY(-1px); filter: brightness(1.03); box-shadow: 0 13px 28px rgba(103,75,35,.2), inset 0 1px 0 rgba(255,255,255,.76); }
+		button:active { transform: translateY(1px) scale(.99); }
+		button.secondary { background: linear-gradient(145deg, #d9e8e9, #b8d1d3); }
+		button.ghost { background: rgba(255,255,255,.42); }
+
+		.hud { position: absolute; inset: 0; display: none; pointer-events: none; }
+		.hud.active { display: block; }
+		.hud-card {
+			position: absolute; padding: 13px 15px; border: 1px solid rgba(73,57,38,.13); border-radius: 22px;
+			background: var(--panel); box-shadow: 0 10px 30px rgba(72,51,29,.12), inset 0 1px 0 rgba(255,255,255,.64);
+			backdrop-filter: blur(8px); color: #4d453d;
+		}
+		.stats { left: 18px; top: 18px; min-width: 230px; }
+		.stats .big { font-size: 26px; font-weight: 950; letter-spacing: -.04em; }
+		.stats .small { margin-top: 4px; color: #786d62; font-size: 13px; font-weight: 750; }
+
+		.mode-status { left: 18px; top: 105px; min-width: 230px; max-width: 270px; }
+		.mode-status .title { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; font-weight: 950; color: #75695d; }
+		.mode-status .text { margin-top: 5px; font-size: 13px; line-height: 1.35; font-weight: 850; color: #4e463e; }
+
+		.mission { left: 50%; top: 18px; width: min(430px, calc(100vw - 400px)); min-width: 310px; transform: translateX(-50%); }
+		.mission-title { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; font-weight: 950; color: #75695d; }
+		.mission-text { margin-top: 5px; font-size: 14px; font-weight: 900; color: #4e463e; }
+		.progress { margin-top: 9px; height: 9px; border-radius: 999px; background: rgba(100,78,50,.12); overflow: hidden; }
+		.bar { height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg, #9fd6cf, #e9c678); transition: width .18s ease; }
+		.note { margin-top: 6px; font-size: 12px; font-weight: 800; color: #7c7166; min-height: 16px; }
+
+		.leaderboard { right: 18px; top: 18px; width: 255px; }
+		.leaderboard h2 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .11em; color: #75695d; }
+		.leader-row { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid rgba(88,65,39,.08); font-size: 12px; font-weight: 850; }
+		.leader-row:first-of-type { border-top: 0; }
+		.leader-row.player { color: #2f776f; }
+
+		.bottom-tools { left: 18px; bottom: 18px; display: flex; align-items: center; gap: 10px; pointer-events: auto; }
+		.bottom-tools button { padding: 10px 13px; font-size: 13px; }
+		.toggle-pill { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 999px; background: rgba(255,255,255,.36); font-size: 13px; font-weight: 850; color: #5b5148; cursor: pointer; }
+		.toggle-pill input { accent-color: #8fab83; }
+
+		.minimap { right: 18px; bottom: 18px; width: 150px; height: 150px; padding: 10px; }
+		.minimap canvas { position: static; width: 100%; height: 100%; border-radius: 16px; background: rgba(255,255,255,.25); }
+
+		.help { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 9px 13px; border-radius: 999px; background: rgba(255,249,232,.58); border: 1px solid rgba(80,65,45,.08); color: rgba(80,69,58,.72); font-size: 12px; font-weight: 850; pointer-events: none; backdrop-filter: blur(6px); }
+		.toast { position: absolute; left: 50%; top: 116px; transform: translateX(-50%) translateY(-8px); padding: 10px 15px; border-radius: 999px; background: rgba(255,249,232,.94); border: 1px solid rgba(80,65,45,.11); box-shadow: 0 10px 30px rgba(72,51,29,.13); font-size: 13px; font-weight: 950; color: #4f463e; opacity: 0; transition: opacity .18s ease, transform .18s ease; }
+		.toast.active { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+		@media (max-width: 950px) {
+			.grid, .mode-summary, .mode-picker-layout { grid-template-columns: 1fr; }
+			.leaderboard { display: none; }
+			.mission { top: auto; bottom: 82px; width: min(430px, calc(100vw - 36px)); }
+		}
+		@media (max-width: 650px) {
+			.card { padding: 28px 20px; border-radius: 28px; }
+			.mode-status { display: none; }
+			.minimap { width: 118px; height: 118px; }
+			.help { display: none; }
+		}
+	</style>
+</head>
+<body>
+	<canvas id="gameCanvas"></canvas>
+
+	<div class="ui-layer">
+		<section id="mainMenu" class="overlay active">
+			<div class="card">
+				<div class="vine" aria-hidden="true">
+					<svg viewBox="0 0 900 80" preserveAspectRatio="none">
+						<path d="M-20 35 C 90 4, 140 68, 260 32 S 450 12, 560 35 S 760 70, 930 25" fill="none" stroke="rgba(101,139,91,.62)" stroke-width="5" stroke-linecap="round"/>
+						<g fill="rgba(130,166,119,.72)">
+							<ellipse cx="96" cy="22" rx="13" ry="7" transform="rotate(-25 96 22)"/><ellipse cx="182" cy="48" rx="14" ry="7" transform="rotate(28 182 48)"/>
+							<ellipse cx="296" cy="24" rx="12" ry="7" transform="rotate(-18 296 24)"/><ellipse cx="430" cy="18" rx="15" ry="8" transform="rotate(18 430 18)"/>
+							<ellipse cx="585" cy="42" rx="13" ry="7" transform="rotate(-31 585 42)"/><ellipse cx="740" cy="56" rx="15" ry="8" transform="rotate(22 740 56)"/>
+						</g>
+					</svg>
+				</div>
+
+				<div class="menu-topline"><span class="soft-dot"></span><span>single-player · pastel · bots vivos</span></div>
+				<h1>Pint.io</h1>
+				<p class="subtitle">
+					Escolha um preset limpo ou abra o modo personalizado para ligar/desligar as mecânicas antes de entrar na sala. A base com bots de personalidade, carinhas, humor e mini-missões fica sempre ativa.
+				</p>
+
+				<div class="mode-summary">
+					<div>
+						<div class="mode-kicker">Modo selecionado</div>
+						<div id="selectedModeTitle" class="selected-mode-title">Clássico</div>
+						<div id="selectedModeDesc" class="selected-mode-desc">A experiência base: bots com personalidade, expressões, humor visual e mini-missões.</div>
+						<div id="selectedModeTags" class="mode-tags"></div>
+					</div>
+					<button id="openModeDialogButton" class="select-mode-button" type="button">Escolher modo</button>
+				</div>
+
+				<div class="grid">
+					<div class="box">
+						<label><span>Bots</span><strong id="botCountLabel">25</strong></label>
+						<input id="botCount" type="range" min="5" max="70" value="25" />
+						<label style="margin-top:16px"><span>Comidas</span><strong id="foodCountLabel">550</strong></label>
+						<input id="foodCount" type="range" min="120" max="1300" value="550" />
+					</div>
+					<div class="box">
+						<label><span>Stop motion / trepidação</span><input id="menuStopMotion" type="checkbox" checked /></label>
+						<label><span>FPS visual</span><strong id="visualFpsLabel">12</strong></label>
+						<input id="visualFps" type="range" min="6" max="30" value="12" />
+						<label style="margin-top:16px"><span>Força da trepidação</span><strong id="jitterLabel">1.6</strong></label>
+						<input id="jitterStrength" type="range" min="0" max="4" step="0.1" value="1.6" />
+					</div>
+				</div>
+
+				<div class="actions">
+					<button id="startButton">Jogar</button>
+					<button id="demoButton" class="secondary">Modo calmo</button>
+					<button id="hardButton" class="ghost">Caótico rápido</button>
+				</div>
+			</div>
+		</section>
+
+		<div id="modeDialog" class="modal-overlay" aria-hidden="true">
+			<div class="mode-dialog" role="dialog" aria-modal="true" aria-labelledby="modeDialogTitle">
+				<div class="dialog-head">
+					<div>
+						<h2 id="modeDialogTitle" class="dialog-title">Escolher modo</h2>
+						<p class="dialog-subtitle">Presets são atalhos. O Personalizado é onde você mistura mecânicas sem criar um monte de opções tipo “1 + 2 + 3”.</p>
+					</div>
+					<button id="closeModeDialogButton" class="close-button" type="button">Fechar</button>
+				</div>
+
+				<div class="mode-picker-layout">
+					<div class="mode-option-list" id="modeOptionList">
+						<button class="mode-option active" type="button" data-mode="classic">
+							<span class="option-icon">○</span>
+							<span><span class="option-title">Clássico</span><span class="option-desc">Partida limpa com a base fixa: bots, carinhas, humor e missões.</span></span>
+						</button>
+						<button class="mode-option" type="button" data-mode="special">
+							<span class="option-icon">✦</span>
+							<span><span class="option-title">Gotas Especiais</span><span class="option-desc">Modo 1. Gotas raras mudam o ritmo com buffs, cura e tinta preta.</span></span>
+						</button>
+						<button class="mode-option" type="button" data-mode="vines">
+							<span class="option-icon">☘</span>
+							<span><span class="option-title">Trepadeiras BR</span><span class="option-desc">Modo 2. Battle royale pastel com zona segura fechando.</span></span>
+						</button>
+						<button class="mode-option" type="button" data-mode="trails">
+							<span class="option-icon">≈</span>
+							<span><span class="option-title">Rastros de Tinta</span><span class="option-desc">Modo 3. Blobs pintam o chão e ganham ritmo sobre a própria tinta.</span></span>
+						</button>
+						<button class="mode-option" type="button" data-mode="events">
+							<span class="option-icon">✺</span>
+							<span><span class="option-title">Eventos Vivos</span><span class="option-desc">Modo 4. Chuva de tinta, vento, florada, chá e manchas mudam a partida.</span></span>
+						</button>
+						<button class="mode-option" type="button" data-mode="powerups">
+							<span class="option-icon">✧</span>
+							<span><span class="option-title">Power-ups de Pintura</span><span class="option-desc">Modo 5. Pincelada, carimbo, solvente, cola e aquarela mudam as jogadas.</span></span>
+						</button>
+						<button class="mode-option" type="button" data-mode="zones">
+							<span class="option-icon">◍</span>
+							<span><span class="option-title">Zonas do Mapa</span><span class="option-desc">Modo 6. Jardim, lago de tinta, bosque, mesa do pintor e mancha seca.</span></span>
+						</button>
+						<button class="mode-option" type="button" data-mode="custom">
+							<span class="option-icon">⚙</span>
+							<span><span class="option-title">Personalizado</span><span class="option-desc">Monte a sala ativando ou desligando as mecânicas disponíveis.</span></span>
+						</button>
+					</div>
+
+					<div class="mode-details">
+						<div class="detail-eyebrow">Detalhes da sala</div>
+						<div id="dialogModeTitle" class="detail-title">Clássico</div>
+						<div id="dialogModeDesc" class="detail-desc">A experiência base, sem mecânicas extras.</div>
+
+						<div class="mechanic-list">
+							<div class="mechanic-card">
+								<div><div class="mechanic-title">Base fixa</div><div class="mechanic-desc">Bots com personalidade, expressões, humor visual e mini-missões.</div></div>
+								<span class="always-on">sempre ativo</span>
+							</div>
+							<div class="mechanic-card">
+								<div><div class="mechanic-title">Modo 1 · Gotas especiais</div><div class="mechanic-desc">Ouro, velocidade, verniz, cura e tinta preta espalhadas pela arena.</div></div>
+								<label class="switch"><input id="customSpecialToggle" type="checkbox"><span class="slider"></span></label>
+							</div>
+							<div class="mechanic-card">
+								<div><div class="mechanic-title">Modo 2 · Trepadeiras BR</div><div class="mechanic-desc">A zona segura fecha e as trepadeiras drenam massa de quem fica fora.</div></div>
+								<label class="switch"><input id="customVinesToggle" type="checkbox"><span class="slider"></span></label>
+							</div>
+							<div class="mechanic-card">
+								<div><div class="mechanic-title">Modo 3 · Rastros de tinta</div><div class="mechanic-desc">Blobs deixam tinta no chão; a própria tinta dá impulso leve e tinta rival deixa tudo escorregadio.</div></div>
+								<label class="switch"><input id="customTrailsToggle" type="checkbox"><span class="slider"></span></label>
+							</div>
+							<div class="mechanic-card">
+								<div><div class="mechanic-title">Modo 4 · Eventos vivos</div><div class="mechanic-desc">A partida recebe chuva de tinta, vento de papel, florada, hora do chá e manchas pretas.</div></div>
+								<label class="switch"><input id="customEventsToggle" type="checkbox"><span class="slider"></span></label>
+							</div>
+							<div class="mechanic-card">
+								<div><div class="mechanic-title">Modo 5 · Power-ups de pintura</div><div class="mechanic-desc">Pincelada, carimbo, solvente, cola e aquarela aparecem como ferramentas temporárias.</div></div>
+								<label class="switch"><input id="customPowerupsToggle" type="checkbox"><span class="slider"></span></label>
+							</div>
+							<div class="mechanic-card">
+								<div><div class="mechanic-title">Modo 6 · Zonas do mapa</div><div class="mechanic-desc">Regiões com regras próprias: jardim, lago de tinta, bosque, mesa do pintor e mancha seca.</div></div>
+								<label class="switch"><input id="customZonesToggle" type="checkbox"><span class="slider"></span></label>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="dialog-actions">
+					<button id="cancelModeDialogButton" class="ghost" type="button">Cancelar</button>
+					<button id="applyModeDialogButton" type="button">Usar este modo</button>
+				</div>
+			</div>
+		</div>
+
+		<section id="gameOverMenu" class="overlay">
+			<div class="card">
+				<div class="vine" aria-hidden="true"><svg viewBox="0 0 900 80" preserveAspectRatio="none"><path d="M-20 35 C 90 4, 140 68, 260 32 S 450 12, 560 35 S 760 70, 930 25" fill="none" stroke="rgba(101,139,91,.62)" stroke-width="5" stroke-linecap="round"/></svg></div>
+				<h1>Virou tinta.</h1>
+				<p id="gameOverText" class="subtitle">Sua célula foi absorvida.</p>
+				<div class="actions"><button id="restartButton">Jogar de novo</button><button id="backToMenuButton" class="secondary">Voltar ao menu</button></div>
+			</div>
+		</section>
+
+		<div id="hud" class="hud">
+			<div class="hud-card stats"><div class="big" id="massText">Massa 0</div><div class="small" id="rankText">posição #1</div></div>
+			<div class="hud-card mode-status"><div class="title" id="modeTitle">Modo</div><div class="text" id="modeText">...</div></div>
+			<div class="hud-card mission"><div class="mission-title">Mini-missão</div><div id="missionText" class="mission-text">...</div><div class="progress"><div id="missionBar" class="bar"></div></div><div id="missionNote" class="note"></div></div>
+			<div class="hud-card leaderboard"><h2>Top blobs</h2><div id="leaderboardRows"></div></div>
+			<div class="hud-card bottom-tools"><button id="pauseButton" class="secondary">Pausar</button><label class="toggle-pill"><input id="hudStopMotion" type="checkbox" checked /><span>stop motion</span></label></div>
+			<div class="hud-card minimap"><canvas id="miniCanvas" width="260" height="260"></canvas></div>
+			<div class="help">mouse move · P pausa · ESC menu</div>
+			<div id="toast" class="toast"></div>
+		</div>
+	</div>
+
+	<script>
+	(() => {
+		"use strict";
+
+		const canvas = document.getElementById("gameCanvas");
+		const ctx = canvas.getContext("2d");
+		const miniCanvas = document.getElementById("miniCanvas");
+		const miniCtx = miniCanvas.getContext("2d");
+
+		const mainMenu = document.getElementById("mainMenu");
+		const gameOverMenu = document.getElementById("gameOverMenu");
+		const hud = document.getElementById("hud");
+		const startButton = document.getElementById("startButton");
+		const demoButton = document.getElementById("demoButton");
+		const hardButton = document.getElementById("hardButton");
+		const openModeDialogButton = document.getElementById("openModeDialogButton");
+		const modeDialog = document.getElementById("modeDialog");
+		const closeModeDialogButton = document.getElementById("closeModeDialogButton");
+		const cancelModeDialogButton = document.getElementById("cancelModeDialogButton");
+		const applyModeDialogButton = document.getElementById("applyModeDialogButton");
+		const customSpecialToggle = document.getElementById("customSpecialToggle");
+		const customVinesToggle = document.getElementById("customVinesToggle");
+		const customTrailsToggle = document.getElementById("customTrailsToggle");
+		const customEventsToggle = document.getElementById("customEventsToggle");
+		const customPowerupsToggle = document.getElementById("customPowerupsToggle");
+		const customZonesToggle = document.getElementById("customZonesToggle");
+		const selectedModeTitle = document.getElementById("selectedModeTitle");
+		const selectedModeDesc = document.getElementById("selectedModeDesc");
+		const selectedModeTags = document.getElementById("selectedModeTags");
+		const dialogModeTitle = document.getElementById("dialogModeTitle");
+		const dialogModeDesc = document.getElementById("dialogModeDesc");
+		const restartButton = document.getElementById("restartButton");
+		const backToMenuButton = document.getElementById("backToMenuButton");
+		const pauseButton = document.getElementById("pauseButton");
+
+		const botCountInput = document.getElementById("botCount");
+		const foodCountInput = document.getElementById("foodCount");
+		const visualFpsInput = document.getElementById("visualFps");
+		const jitterStrengthInput = document.getElementById("jitterStrength");
+		const menuStopMotionInput = document.getElementById("menuStopMotion");
+		const hudStopMotionInput = document.getElementById("hudStopMotion");
+		const botCountLabel = document.getElementById("botCountLabel");
+		const foodCountLabel = document.getElementById("foodCountLabel");
+		const visualFpsLabel = document.getElementById("visualFpsLabel");
+		const jitterLabel = document.getElementById("jitterLabel");
+
+		const massText = document.getElementById("massText");
+		const rankText = document.getElementById("rankText");
+		const modeTitle = document.getElementById("modeTitle");
+		const modeText = document.getElementById("modeText");
+		const leaderboardRows = document.getElementById("leaderboardRows");
+		const gameOverText = document.getElementById("gameOverText");
+		const missionText = document.getElementById("missionText");
+		const missionBar = document.getElementById("missionBar");
+		const missionNote = document.getElementById("missionNote");
+		const toast = document.getElementById("toast");
+
+		const TAU = Math.PI * 2;
+		const pastelPalette = ["#eaa6ad", "#f0c983", "#b8d8ba", "#a9c8d8", "#d8b7dd", "#f2b8a0", "#b7d7cf", "#e7d99f", "#c6bedf", "#f1c4d6", "#a8cfa6", "#d7b98e", "#a8badb", "#e9b8a6", "#c8d6a1"];
+		const foodPalette = ["#f2b6bd", "#f7d78e", "#bfe2c4", "#b8d7e6", "#d7c2e4", "#f4c3a6", "#c4e0dc", "#efe3ad", "#e4c4cf"];
+		const botBaseNames = ["Amora", "Nuvem", "Limo", "Dália", "Goma", "Pingo", "Fubá", "Luna", "Chá", "Bolha", "Caju", "Tinta", "Pêssego", "Naná", "Mimo", "Folha", "Algodão", "Biscoito", "Jade", "Avelã", "Manga", "Flor", "Céu", "Trigo"];
+
+		const personalities = [
+			{ key: "coward", label: "o Covarde", short: "Covarde", speed: 1.04, fear: 1.7, hunt: .35, food: .9, jitter: 1.45, thinkMin: 1.1, thinkMax: 2.4, startRadius: [18, 30] },
+			{ key: "glutton", label: "o Guloso", short: "Guloso", speed: .96, fear: 1, hunt: .55, food: 1.75, jitter: .85, thinkMin: 1.7, thinkMax: 3.5, startRadius: [20, 36] },
+			{ key: "hunter", label: "o Caçador", short: "Caçador", speed: 1.02, fear: .9, hunt: 1.65, food: .8, jitter: .95, thinkMin: 1.2, thinkMax: 2.8, startRadius: [22, 38] },
+			{ key: "goofy", label: "o Bobo", short: "Bobo", speed: .88, fear: 1, hunt: .65, food: 1.05, jitter: 1.2, thinkMin: .7, thinkMax: 1.8, startRadius: [18, 33] },
+			{ key: "giant", label: "o Gigante Lento", short: "Gigante", speed: .68, fear: .55, hunt: .95, food: .75, jitter: .55, thinkMin: 2.2, thinkMax: 4.7, startRadius: [38, 55] },
+			{ key: "nervous", label: "o Nervosinho", short: "Nervoso", speed: 1.12, fear: 1.25, hunt: .85, food: 1.1, jitter: 2.1, thinkMin: .35, thinkMax: 1.05, startRadius: [17, 31] }
+		];
+
+		const specialTypes = {
+			gold: { label: "ouro", color: "#f3cf72", chance: .018, radius: [9, 13], mass: 520, toast: "Gota dourada: massa extra!" },
+			blue: { label: "azul", color: "#8fc9e8", chance: .023, radius: [8, 12], mass: 130, toast: "Gota azul: velocidade por alguns segundos!" },
+			pink: { label: "verniz", color: "#efb2c8", chance: .018, radius: [8, 12], mass: 120, toast: "Verniz rosa: difícil de ser absorvido!" },
+			green: { label: "verde", color: "#a9d68f", chance: .022, radius: [8, 12], mass: 240, toast: "Gota verde: regenerou sua massa!" },
+			black: { label: "tinta preta", color: "#514850", chance: .014, radius: [8, 12], mass: 70, toast: "Tinta preta: visão suja por um tempo!" }
+		};
+
+		const powerupTypes = {
+			brush: { label: "pincelada", icon: "➜", color: "#8fc9e8", chance: .018, toast: "Pincelada: dash e velocidade curta!" },
+			watercolor: { label: "aquarela", icon: "◎", color: "#a7d7cf", chance: .015, toast: "Aquarela: absorção em área por alguns segundos!" },
+			stamp: { label: "carimbo", icon: "◆", color: "#d6b8df", chance: .014, toast: "Carimbo: cópias falsas confundem os bots!" },
+			solvent: { label: "solvente", icon: "−", color: "#f0d38a", chance: .013, toast: "Solvente: blobs próximos perdem massa!" },
+			glue: { label: "cola", icon: "✹", color: "#e9b0a8", chance: .014, toast: "Cola: aura grudenta reduz rivais próximos!" }
+		};
+
+		const zoneTemplates = [
+			{ key: "garden", name: "Jardim de Papel", desc: "mais gotas e movimento macio", x: 1220, y: 1260, r: 620, color: "rgba(169,214,143,.15)", stroke: "rgba(103,151,91,.24)" },
+			{ key: "inkLake", name: "Lago de Tinta", desc: "desacelera e suja a visão", x: 3860, y: 1280, r: 560, color: "rgba(66,61,72,.16)", stroke: "rgba(42,38,47,.24)" },
+			{ key: "vineGrove", name: "Bosque das Trepadeiras", desc: "grandes ficam enroscados", x: 1350, y: 3880, r: 600, color: "rgba(97,142,82,.14)", stroke: "rgba(84,128,72,.26)" },
+			{ key: "painterTable", name: "Mesa do Pintor", desc: "mais ferramentas e gotas raras", x: 3930, y: 3800, r: 590, color: "rgba(232,196,118,.15)", stroke: "rgba(172,128,57,.25)" },
+			{ key: "dryStain", name: "Mancha Seca", desc: "pouca comida e drena massa", x: 2620, y: 2620, r: 520, color: "rgba(153,124,84,.13)", stroke: "rgba(124,92,55,.21)" }
+		];
+
+		const modeInfo = {
+			classic: {
+				title: "Clássico",
+				desc: "A experiência base: bots com personalidade, expressões, humor visual e mini-missões.",
+				special: false, vines: false, trails: false, events: false, powerups: false, zones: false
+			},
+			special: {
+				title: "Gotas Especiais",
+				desc: "Modo 1. Gotas raras adicionam massa, velocidade, verniz, cura e tinta preta.",
+				special: true, vines: false, trails: false, events: false, powerups: false, zones: false
+			},
+			vines: {
+				title: "Trepadeiras BR",
+				desc: "Modo 2. Battle royale pastel: a zona segura fecha e as trepadeiras punem quem fica fora.",
+				special: false, vines: true, trails: false, events: false, powerups: false, zones: false
+			},
+			trails: {
+				title: "Rastros de Tinta",
+				desc: "Modo 3. A arena vira uma pintura viva: blobs deixam rastros, ganham impulso na própria tinta e escorregam na tinta rival.",
+				special: false, vines: false, trails: true, events: false, powerups: false, zones: false
+			},
+			events: {
+				title: "Eventos Vivos",
+				desc: "Modo 4. A partida recebe acontecimentos temporários como chuva de tinta, vento de papel, florada, chá e manchas pretas.",
+				special: false, vines: false, trails: false, events: true, powerups: false, zones: false
+			},
+			powerups: {
+				title: "Power-ups de Pintura",
+				desc: "Modo 5. Ferramentas temporárias mudam a jogada: pincelada, aquarela, carimbo, solvente e cola.",
+				special: false, vines: false, trails: false, events: false, powerups: true, zones: false
+			},
+			zones: {
+				title: "Zonas do Mapa",
+				desc: "Modo 6. A arena ganha regiões com comportamento próprio: jardim, lago, bosque, mesa do pintor e mancha seca.",
+				special: false, vines: false, trails: false, events: false, powerups: false, zones: true
+			},
+			custom: {
+				title: "Personalizado",
+				desc: "Sala montada por você com as mecânicas extras ligadas ou desligadas.",
+				special: false, vines: false, trails: false, events: false, powerups: false, zones: false
+			}
+		};
+
+		const config = {
+			arenaSize: 5200,
+			botTarget: 25,
+			foodTarget: 550,
+			stopMotion: true,
+			visualStepFps: 12,
+			jitterStrength: 1.6,
+			cameraSmooth: 7.5,
+			playerName: "Você",
+			mode: "classic",
+			custom: {
+				special: false,
+				vines: false,
+				trails: false,
+				events: false
+			},
+			draftMode: "classic",
+			draftCustom: {
+				special: false,
+				vines: false,
+				trails: false,
+				events: false
+			}
+		};
+
+		const state = {
+			mode: "menu",
+			paused: false,
+			lastTime: 0,
+			time: 0,
+			runTime: 0,
+			nextVisualTick: 0,
+			nextHudTick: 0,
+			nextBotRespawnTick: 0,
+			cells: [],
+			foods: [],
+			player: null,
+			idSeq: 1,
+			bgPattern: null,
+			mission: null,
+			stats: null,
+			vines: { centerX: 2600, centerY: 2600, startRadius: 2450, currentRadius: 2450, finalRadius: 760, shrinkDelay: 12, shrinkDuration: 270, pulse: 0 },
+			trails: [],
+			powerups: [],
+			decoys: [],
+			zones: [],
+			nextPowerupSpawnAt: 0,
+			nextZoneBurstAt: 0,
+			eventState: { active: null, nextAt: 0, until: 0, pulse: 0, windX: 0, windY: 0, spots: [], lastBurstAt: 0 },
+			input: { screenX: innerWidth / 2, screenY: innerHeight / 2, worldX: 0, worldY: 0, hasPointer: false },
+			camera: { x: 2600, y: 2600, zoom: .8 }
+		};
+
+		function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+		function lerp(a, b, t) { return a + (b - a) * t; }
+		function rand(min, max) { return min + Math.random() * (max - min); }
+		function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+		function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+		function distSq(ax, ay, bx, by) { const dx = ax - bx; const dy = ay - by; return dx * dx + dy * dy; }
+		function norm(dx, dy) { const d = Math.hypot(dx, dy); return d <= .0001 ? { x: 0, y: 0, d: 0 } : { x: dx / d, y: dy / d, d }; }
+		function hashNoise(n) { const x = Math.sin(n * 12.9898) * 43758.5453123; return x - Math.floor(x); }
+		function randBySeed(seed, min, max) { return min + hashNoise(seed * 97.13) * (max - min); }
+		function speedForRadius(radius) { return clamp(188 - radius * 1.18, 42, 165); }
+		function activeMode(mode = config.mode, customSettings = config.custom) {
+			if (mode === "custom") {
+				return {
+					...modeInfo.custom,
+					special: !!customSettings.special,
+					vines: !!customSettings.vines,
+					trails: !!customSettings.trails,
+					events: !!customSettings.events,
+					powerups: !!customSettings.powerups,
+					zones: !!customSettings.zones
+				};
+			}
+			return modeInfo[mode] || modeInfo.classic;
+		}
+
+		class Cell {
+			constructor({ x, y, radius, color, name, type, personality = null }) {
+				this.id = state.idSeq++;
+				this.x = x; this.y = y; this.vx = 0; this.vy = 0;
+				this.radius = radius; this.mass = radius * radius;
+				this.color = color; this.name = name; this.type = type; this.personality = personality;
+				this.alive = true; this.seed = Math.random() * 10000;
+				this.wanderX = x; this.wanderY = y; this.nextThink = 0;
+				this.mood = "calmo"; this.moodStrength = 0; this.moodUntil = 0; this.rewardUntil = 0; this.lastAteAt = 0;
+				this.effects = { speedUntil: 0, shieldUntil: 0, inkUntil: 0, slowUntil: 0, paintBoostUntil: 0, watercolorUntil: 0, glueUntil: 0, zoneUntil: 0 };
+				this.nextTrailAt = 0;
+				this.visual = { x, y, radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+			}
+			refreshRadius() { this.radius = Math.sqrt(this.mass); }
+			addMass(amount) { this.mass = Math.max(180, this.mass + amount); this.refreshRadius(); }
+			moveToward(tx, ty, dt, moodSpeed = 1) {
+				const dir = norm(tx - this.x, ty - this.y);
+				const personalitySpeed = this.personality ? this.personality.speed : 1;
+				const boost = this.effects.speedUntil > state.time ? 1.45 : this.effects.paintBoostUntil > state.time ? 1.12 : this.effects.zoneUntil > state.time ? 1.08 : 1;
+				const slow = this.effects.slowUntil > state.time ? .62 : 1;
+				const speed = speedForRadius(this.radius) * moodSpeed * personalitySpeed * boost * slow;
+				const slowDown = clamp(dir.d / 120, .15, 1);
+				const desiredVx = dir.x * speed * slowDown;
+				const desiredVy = dir.y * speed * slowDown;
+				const accel = 1 - Math.exp(-dt * 8.5);
+				this.vx = lerp(this.vx, desiredVx, accel);
+				this.vy = lerp(this.vy, desiredVy, accel);
+				this.x += this.vx * dt;
+				this.y += this.vy * dt;
+				this.keepInsideArena();
+			}
+			keepInsideArena() {
+				const min = this.radius + 8;
+				const max = config.arenaSize - this.radius - 8;
+				if (this.x < min) { this.x = min; this.vx *= -.25; } else if (this.x > max) { this.x = max; this.vx *= -.25; }
+				if (this.y < min) { this.y = min; this.vy *= -.25; } else if (this.y > max) { this.y = max; this.vy *= -.25; }
+			}
+		}
+
+		class Food {
+			constructor(x, y, special = null) {
+				this.id = state.idSeq++; this.x = x; this.y = y; this.special = special;
+				if (special) {
+					const data = specialTypes[special];
+					this.radius = rand(data.radius[0], data.radius[1]);
+					this.mass = data.mass;
+					this.color = data.color;
+				} else {
+					this.radius = rand(3.5, 7.8);
+					this.mass = this.radius * this.radius * rand(.72, 1.12);
+					this.color = pick(foodPalette);
+				}
+				this.seed = Math.random() * 10000; this.alive = true;
+				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+			}
+		}
+
+
+		class PowerUp {
+			constructor(x, y, type = null) {
+				this.id = state.idSeq++;
+				this.x = x; this.y = y; this.type = type || pick(Object.keys(powerupTypes));
+				const data = powerupTypes[this.type];
+				this.radius = rand(13, 17); this.color = data.color; this.icon = data.icon; this.label = data.label;
+				this.seed = Math.random() * 10000; this.alive = true; this.life = rand(24, 38);
+				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+			}
+		}
+
+		class Decoy {
+			constructor(owner, angleOffset = 0) {
+				this.id = state.idSeq++; this.ownerId = owner.id;
+				this.x = owner.x + Math.cos(angleOffset) * owner.radius * 1.5;
+				this.y = owner.y + Math.sin(angleOffset) * owner.radius * 1.5;
+				this.vx = owner.vx * .35 + Math.cos(angleOffset) * 85;
+				this.vy = owner.vy * .35 + Math.sin(angleOffset) * 85;
+				this.radius = owner.radius * rand(.72, .9); this.color = owner.color; this.name = "carimbo";
+				this.seed = Math.random() * 10000; this.life = 7.5; this.maxLife = 7.5;
+				this.visual = { x: this.x, y: this.y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+			}
+		}
+
+		function resize() {
+			const dpr = Math.max(1, Math.min(2, devicePixelRatio || 1));
+			canvas.width = Math.floor(innerWidth * dpr); canvas.height = Math.floor(innerHeight * dpr);
+			canvas.style.width = innerWidth + "px"; canvas.style.height = innerHeight + "px";
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		}
+
+		function createPaperPattern() {
+			const p = document.createElement("canvas"); p.width = 420; p.height = 420;
+			const pctx = p.getContext("2d");
+			pctx.fillStyle = "#f5ecd8"; pctx.fillRect(0, 0, p.width, p.height);
+			for (let i = 0; i < 5200; i++) {
+				const a = Math.random() * .08;
+				pctx.fillStyle = Math.random() > .5 ? `rgba(137,106,66,${a})` : `rgba(255,255,255,${a})`;
+				pctx.fillRect(Math.random() * p.width, Math.random() * p.height, rand(.4, 1.8), rand(.4, 1.8));
+			}
+			for (let i = 0; i < 46; i++) {
+				pctx.beginPath(); pctx.arc(rand(0, p.width), rand(0, p.height), rand(12, 60), 0, TAU);
+				pctx.fillStyle = `rgba(180,146,95,${rand(.012, .035)})`; pctx.fill();
+			}
+			state.bgPattern = ctx.createPattern(p, "repeat");
+		}
+
+		function chooseSpecialFood() {
+			if (!activeMode().special) return null;
+			const roll = Math.random(); let acc = 0;
+			for (const [key, data] of Object.entries(specialTypes)) {
+				acc += data.chance;
+				if (roll < acc) return key;
+			}
+			return null;
+		}
+
+		function spawnFood(amount = 1) {
+			for (let i = 0; i < amount; i++) {
+				state.foods.push(new Food(rand(80, config.arenaSize - 80), rand(80, config.arenaSize - 80), chooseSpecialFood()));
+			}
+		}
+
+		function choosePowerUpType() {
+			const keys = Object.keys(powerupTypes);
+			let total = 0;
+			for (const key of keys) total += powerupTypes[key].chance;
+			let roll = Math.random() * total;
+			for (const key of keys) {
+				roll -= powerupTypes[key].chance;
+				if (roll <= 0) return key;
+			}
+			return pick(keys);
+		}
+
+		function spawnPowerUp(x = rand(120, config.arenaSize - 120), y = rand(120, config.arenaSize - 120), type = null) {
+			if (!activeMode().powerups) return;
+			if (state.powerups.length > 26) return;
+			state.powerups.push(new PowerUp(x, y, type || choosePowerUpType()));
+		}
+
+		function spawnBot() {
+			const personality = pick(personalities);
+			const radius = rand(personality.startRadius[0], personality.startRadius[1]);
+			const bot = new Cell({
+				x: rand(120, config.arenaSize - 120), y: rand(120, config.arenaSize - 120), radius,
+				color: pick(pastelPalette), name: `${pick(botBaseNames)}, ${personality.label}`, type: "bot", personality
+			});
+			bot.mass *= personality.key === "giant" ? rand(1.25, 1.7) : rand(.82, 1.35);
+			bot.refreshRadius(); state.cells.push(bot);
+		}
+
+		function spawnPlayer() {
+			const player = new Cell({ x: config.arenaSize / 2 + rand(-120, 120), y: config.arenaSize / 2 + rand(-120, 120), radius: 26, color: "#9fd6cf", name: config.playerName, type: "player" });
+			state.player = player; state.cells.push(player);
+		}
+
+		function makeStats() {
+			return { foodsEaten: 0, specialEaten: 0, powerupsEaten: 0, botsEaten: 0, trailBoostSeconds: 0, eventSurviveSeconds: 0, zoneSeconds: 0, top5Seconds: 0, escapeSeconds: 0, missionsCompleted: 0, playerThreatNear: false, playerRank: 1, toastUntil: 0 };
+		}
+
+		function makeMission() {
+			const completed = state.stats ? state.stats.missionsCompleted : 0;
+			const mode = activeMode();
+			const pool = mode.special ? ["foods", "special", "top5", "escape", "hunt", "grow"] : ["foods", "top5", "escape", "hunt", "grow"];
+			if (mode.vines) pool.push("surviveZone");
+			if (mode.trails) pool.push("paintTrail");
+			if (mode.events) pool.push("eventSurvive");
+			if (mode.powerups) pool.push("powerup");
+			if (mode.zones) pool.push("zoneVisit");
+			const type = pool[completed % pool.length];
+			if (type === "foods") { const target = clamp(18 + completed * 3, 18, 55); return { type, title: `Coma ${target} gotas de tinta`, target, start: state.stats.foodsEaten, value: 0 }; }
+			if (type === "special") { const target = clamp(3 + Math.floor(completed / 2), 3, 9); return { type, title: `Pegue ${target} gotas especiais`, target, start: state.stats.specialEaten, value: 0 }; }
+			if (type === "top5") { const target = clamp(18 + completed * 4, 18, 45); return { type, title: `Fique no top 5 por ${target}s`, target, value: 0 }; }
+			if (type === "escape") { const target = clamp(8 + completed * 1.5, 8, 22); return { type, title: `Fuja de blobs maiores por ${Math.round(target)}s`, target, value: 0 }; }
+			if (type === "hunt") { const target = clamp(1 + Math.floor(completed / 3), 1, 4); return { type, title: `Absorva ${target} bot${target > 1 ? "s" : ""}`, target, start: state.stats.botsEaten, value: 0 }; }
+			if (type === "surviveZone") { const target = clamp(28 + completed * 4, 28, 65); return { type, title: `Sobreviva ${target}s na zona segura`, target, value: 0 }; }
+			if (type === "paintTrail") { const target = clamp(8 + completed * 1.2, 8, 24); return { type, title: `Pegue impulso na própria tinta por ${Math.round(target)}s`, target, value: 0 }; }
+			if (type === "eventSurvive") { const target = clamp(14 + completed * 2, 14, 40); return { type, title: `Sobreviva ${Math.round(target)}s durante eventos`, target, value: 0 }; }
+			if (type === "powerup") { const target = clamp(2 + Math.floor(completed / 3), 2, 6); return { type, title: `Use ${target} power-up${target > 1 ? "s" : ""} de pintura`, target, start: state.stats.powerupsEaten, value: 0 }; }
+			if (type === "zoneVisit") { const target = clamp(16 + completed * 2, 16, 36); return { type, title: `Fique ${Math.round(target)}s em zonas do mapa`, target, value: 0 }; }
+			const currentMass = state.player ? Math.round(state.player.mass / 10) : 80;
+			const target = currentMass + 60 + completed * 8;
+			return { type, title: `Chegue à massa ${target}`, target, value: currentMass };
+		}
+
+		function setMood(cell, mood, strength = 1, duration = .25) { cell.mood = mood; cell.moodStrength = strength; cell.moodUntil = Math.max(cell.moodUntil, state.time + duration); }
+		function clearExpiredMood(cell) { if (state.time > cell.moodUntil) { cell.mood = "calmo"; cell.moodStrength = 0; } }
+		function showToast(text) { if (!state.stats) return; toast.textContent = text; toast.classList.add("active"); state.stats.toastUntil = state.time + 2.2; }
+		function updateToast() { if (state.stats && state.time > state.stats.toastUntil) toast.classList.remove("active"); }
+
+		function completeMission() {
+			if (!state.player || !state.player.alive) return;
+			state.stats.missionsCompleted++;
+			state.player.addMass(260 + state.stats.missionsCompleted * 28);
+			state.player.rewardUntil = state.time + 5.2;
+			setMood(state.player, "feliz", 1.4, 1.1);
+			showToast("Missão completa! +massa e brilho por alguns segundos");
+			state.mission = makeMission();
+		}
+
+		function updateMission(dt) {
+			const m = state.mission; const p = state.player;
+			if (!m || !p || !p.alive) return;
+			if (m.type === "foods") m.value = state.stats.foodsEaten - m.start;
+			else if (m.type === "special") m.value = state.stats.specialEaten - m.start;
+			else if (m.type === "hunt") m.value = state.stats.botsEaten - m.start;
+			else if (m.type === "grow") m.value = Math.round(p.mass / 10);
+			else if (m.type === "top5" && state.stats.playerRank <= 5) { m.value += dt; state.stats.top5Seconds += dt; }
+			else if (m.type === "escape") { if (state.stats.playerThreatNear) { m.value += dt; state.stats.escapeSeconds += dt; } else m.value = Math.max(0, m.value - dt * .2); }
+			else if (m.type === "surviveZone") { if (!activeMode().vines || isInsideSafeZone(p)) m.value += dt; else m.value = Math.max(0, m.value - dt * .4); }
+			else if (m.type === "paintTrail") { if (p.effects.paintBoostUntil > state.time) m.value += dt; else m.value = Math.max(0, m.value - dt * .15); }
+			else if (m.type === "eventSurvive") { if (state.eventState.active) m.value += dt; else m.value = Math.max(0, m.value - dt * .1); }
+			else if (m.type === "powerup") m.value = state.stats.powerupsEaten - m.start;
+			else if (m.type === "zoneVisit") { if (state.player && state.player.currentZone) m.value += dt; else m.value = Math.max(0, m.value - dt * .12); }
+			if (m.value >= m.target) completeMission();
+		}
+
+		function modeTagsFor(info) {
+			return [
+				{ label: "base fixa", on: true },
+				{ label: "gotas especiais", on: info.special },
+				{ label: "trepadeiras BR", on: info.vines },
+				{ label: "rastros de tinta", on: info.trails },
+				{ label: "eventos vivos", on: info.events },
+				{ label: "power-ups", on: info.powerups },
+				{ label: "zonas", on: info.zones }
+			];
+		}
+
+		function refreshModeSummary() {
+			const info = activeMode();
+			selectedModeTitle.textContent = info.title;
+			selectedModeDesc.textContent = info.desc;
+			selectedModeTags.innerHTML = modeTagsFor(info).map(tag => `<span class="tag ${tag.on ? "on" : "off"}">${tag.label}</span>`).join("");
+		}
+
+		function refreshDialogModeDetails() {
+			const mode = config.draftMode || config.mode;
+			const info = activeMode(mode, config.draftCustom);
+			dialogModeTitle.textContent = info.title;
+			dialogModeDesc.textContent = info.desc;
+			document.querySelectorAll(".mode-option").forEach(option => option.classList.toggle("active", option.dataset.mode === mode));
+
+			const isCustom = mode === "custom";
+			customSpecialToggle.disabled = !isCustom;
+			customVinesToggle.disabled = !isCustom;
+			customTrailsToggle.disabled = !isCustom;
+			customEventsToggle.disabled = !isCustom;
+			customPowerupsToggle.disabled = !isCustom;
+			customZonesToggle.disabled = !isCustom;
+			customSpecialToggle.checked = isCustom ? config.draftCustom.special : info.special;
+			customVinesToggle.checked = isCustom ? config.draftCustom.vines : info.vines;
+			customTrailsToggle.checked = isCustom ? config.draftCustom.trails : info.trails;
+			customEventsToggle.checked = isCustom ? config.draftCustom.events : info.events;
+			customPowerupsToggle.checked = isCustom ? config.draftCustom.powerups : info.powerups;
+			customZonesToggle.checked = isCustom ? config.draftCustom.zones : info.zones;
+		}
+
+		function selectMode(mode) {
+			config.mode = mode;
+			config.draftMode = mode;
+			refreshModeSummary();
+			refreshDialogModeDetails();
+		}
+
+		function openModeDialog() {
+			config.draftMode = config.mode;
+			config.draftCustom = { ...config.custom };
+			modeDialog.classList.add("active");
+			modeDialog.setAttribute("aria-hidden", "false");
+			refreshDialogModeDetails();
+		}
+
+		function closeModeDialog() {
+			modeDialog.classList.remove("active");
+			modeDialog.setAttribute("aria-hidden", "true");
+		}
+
+		function applyDraftMode() {
+			config.custom = { ...config.draftCustom };
+			selectMode(config.draftMode || "classic");
+			closeModeDialog();
+		}
+
+		function syncLabels() {
+			botCountLabel.textContent = botCountInput.value;
+			foodCountLabel.textContent = foodCountInput.value;
+			visualFpsLabel.textContent = visualFpsInput.value;
+			jitterLabel.textContent = Number(jitterStrengthInput.value).toFixed(1);
+		}
+
+		function setMenuValues({ bots, foods, stopMotion, fps, jitter, mode, custom }) {
+			if (bots != null) botCountInput.value = bots;
+			if (foods != null) foodCountInput.value = foods;
+			if (stopMotion != null) menuStopMotionInput.checked = stopMotion;
+			if (fps != null) visualFpsInput.value = fps;
+			if (jitter != null) jitterStrengthInput.value = jitter;
+			if (custom != null) {
+				config.custom = { ...config.custom, ...custom };
+				config.draftCustom = { ...config.custom };
+			}
+			if (mode != null) selectMode(mode);
+			syncLabels();
+		}
+
+		function resetVines() {
+			state.vines.centerX = config.arenaSize / 2;
+			state.vines.centerY = config.arenaSize / 2;
+			state.vines.startRadius = config.arenaSize * .47;
+			state.vines.currentRadius = state.vines.startRadius;
+			state.vines.finalRadius = 760;
+			state.vines.shrinkDelay = 12;
+			const info = activeMode();
+			state.vines.shrinkDuration = info.special && info.vines ? 245 : 285;
+			state.vines.pulse = 0;
+		}
+
+		function resetGame() {
+			state.mode = "playing"; state.paused = false; state.cells = []; state.foods = []; state.idSeq = 1;
+			state.trails = [];
+			state.powerups = [];
+			state.decoys = [];
+			state.zones = zoneTemplates.map(z => ({ ...z }));
+			state.nextPowerupSpawnAt = 3.5;
+			state.nextZoneBurstAt = 1.5;
+			state.eventState = { active: null, nextAt: 18, until: 0, pulse: 0, windX: 0, windY: 0, spots: [], lastBurstAt: 0 };
+			state.runTime = 0; state.nextVisualTick = 0; state.nextHudTick = 0; state.nextBotRespawnTick = 0;
+			state.stats = makeStats(); resetVines();
+			config.botTarget = Number(botCountInput.value); config.foodTarget = Number(foodCountInput.value);
+			config.stopMotion = menuStopMotionInput.checked; config.visualStepFps = Number(visualFpsInput.value); config.jitterStrength = Number(jitterStrengthInput.value);
+			hudStopMotionInput.checked = config.stopMotion;
+			spawnPlayer(); for (let i = 0; i < config.botTarget; i++) spawnBot(); spawnFood(config.foodTarget);
+			state.mission = makeMission(); state.camera.x = state.player.x; state.camera.y = state.player.y; state.camera.zoom = .88;
+			mainMenu.classList.remove("active"); gameOverMenu.classList.remove("active"); hud.classList.add("active"); updateHud(true);
+		}
+
+		function showMainMenu() { state.mode = "menu"; state.paused = false; mainMenu.classList.add("active"); gameOverMenu.classList.remove("active"); hud.classList.remove("active"); }
+		function showGameOver(killerName) {
+			if (state.mode === "gameover") return;
+			state.mode = "gameover"; hud.classList.remove("active"); gameOverMenu.classList.add("active");
+			const mass = state.player ? Math.round(state.player.mass / 10) : 0;
+			const completed = state.stats ? state.stats.missionsCompleted : 0;
+			gameOverText.textContent = killerName ? `${killerName} absorveu você. Massa final: ${mass}. Missões completas: ${completed}.` : `Você desapareceu no mapa. Massa final: ${mass}. Missões completas: ${completed}.`;
+		}
+
+		function screenToWorld(x, y) { return { x: state.camera.x + (x - innerWidth / 2) / state.camera.zoom, y: state.camera.y + (y - innerHeight / 2) / state.camera.zoom }; }
+		function updateInputWorld() { const p = screenToWorld(state.input.screenX, state.input.screenY); state.input.worldX = p.x; state.input.worldY = p.y; }
+
+		function isInsideSafeZone(cell) {
+			const dx = cell.x - state.vines.centerX; const dy = cell.y - state.vines.centerY;
+			return Math.hypot(dx, dy) <= state.vines.currentRadius - cell.radius * .35;
+		}
+
+		function updateVines(dt) {
+			if (!activeMode().vines) return;
+			const v = state.vines;
+			const t = clamp((state.runTime - v.shrinkDelay) / v.shrinkDuration, 0, 1);
+			const eased = t * t * (3 - 2 * t);
+			v.currentRadius = lerp(v.startRadius, v.finalRadius, eased);
+			v.pulse += dt * 2.2;
+
+			for (const cell of state.cells) {
+				if (!cell.alive) continue;
+				const dx = cell.x - v.centerX; const dy = cell.y - v.centerY;
+				const d = Math.hypot(dx, dy);
+				const limit = v.currentRadius - cell.radius * .15;
+				if (d > limit) {
+					const dir = d > .001 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 };
+					const outside = d - limit;
+					const damage = (18 + outside * .05) * dt;
+					cell.addMass(-damage * Math.max(1, cell.radius / 22));
+					cell.vx -= dir.x * (90 + outside * .25) * dt;
+					cell.vy -= dir.y * (90 + outside * .25) * dt;
+					cell.x -= dir.x * (35 + outside * .1) * dt;
+					cell.y -= dir.y * (35 + outside * .1) * dt;
+					cell.effects.slowUntil = Math.max(cell.effects.slowUntil, state.time + .35);
+					setMood(cell, "assustado", 1.3, .3);
+					if (cell.type === "player" && cell.mass <= 210) showGameOver("as trepadeiras");
+					if (cell.type === "bot" && cell.mass <= 200) cell.alive = false;
+				}
+			}
+		}
+
+
+		function eventLabel(type) {
+			return {
+				rain: "chuva de tinta",
+				wind: "vento de papel",
+				bloom: "florada",
+				tea: "hora do chá",
+				inkSpot: "manchas pretas"
+			}[type] || "evento";
+		}
+
+		function isEventActive(type) {
+			return activeMode().events && state.eventState.active === type && state.time < state.eventState.until;
+		}
+
+		function spawnFoodBurst(cx, cy, amount, spread = 160) {
+			const maxFood = config.foodTarget + (activeMode().events ? 220 : 40);
+			for (let i = 0; i < amount && state.foods.length < maxFood; i++) {
+				const a = rand(0, TAU);
+				const d = Math.sqrt(Math.random()) * spread;
+				const x = clamp(cx + Math.cos(a) * d, 70, config.arenaSize - 70);
+				const y = clamp(cy + Math.sin(a) * d, 70, config.arenaSize - 70);
+				state.foods.push(new Food(x, y, chooseSpecialFood()));
+			}
+		}
+
+		function startRandomEvent() {
+			const choices = ["rain", "wind", "bloom", "tea", "inkSpot"];
+			const type = pick(choices);
+			const e = state.eventState;
+			e.active = type;
+			e.until = state.time + (type === "tea" ? 16 : type === "wind" ? 12 : 14);
+			e.pulse = 0;
+			e.lastBurstAt = 0;
+			e.spots = [];
+			e.windX = 0;
+			e.windY = 0;
+
+			if (type === "wind") {
+				const a = rand(0, TAU);
+				e.windX = Math.cos(a) * rand(85, 135);
+				e.windY = Math.sin(a) * rand(85, 135);
+			}
+
+			if (type === "bloom" || type === "inkSpot") {
+				const count = type === "bloom" ? 5 : 4;
+				for (let i = 0; i < count; i++) {
+					e.spots.push({
+						x: rand(350, config.arenaSize - 350),
+						y: rand(350, config.arenaSize - 350),
+						r: type === "bloom" ? rand(180, 310) : rand(210, 360),
+						seed: Math.random() * 9999
+					});
+				}
+			}
+
+			showToast(`Evento: ${eventLabel(type)}!`);
+		}
+
+		function updateEvents(dt) {
+			if (!activeMode().events) return;
+			const e = state.eventState;
+
+			if (e.active && state.time >= e.until) {
+				showToast(`${eventLabel(e.active)} acabou.`);
+				e.active = null;
+				e.nextAt = state.runTime + rand(18, 30);
+				e.spots = [];
+			}
+
+			if (!e.active && state.runTime >= e.nextAt) {
+				startRandomEvent();
+			}
+
+			if (!e.active) return;
+			e.pulse += dt;
+
+			const player = state.player;
+			if (player && player.alive) state.stats.eventSurviveSeconds += dt;
+
+			if (e.active === "rain" && state.time - e.lastBurstAt > .22) {
+				e.lastBurstAt = state.time;
+				const focus = player && player.alive ? player : { x: config.arenaSize / 2, y: config.arenaSize / 2 };
+				spawnFoodBurst(focus.x + rand(-560, 560), focus.y + rand(-560, 560), 5, 210);
+			}
+
+			if (e.active === "bloom" && state.time - e.lastBurstAt > 1.05) {
+				e.lastBurstAt = state.time;
+				for (const spot of e.spots) spawnFoodBurst(spot.x, spot.y, 7, spot.r * .72);
+			}
+
+			if (e.active === "wind") {
+				for (const cell of state.cells) {
+					if (!cell.alive) continue;
+					cell.vx += e.windX * dt;
+					cell.vy += e.windY * dt;
+					setMood(cell, cell.type === "bot" && cell.personality.key === "nervous" ? "nervoso" : "bobo", .7, .22);
+				}
+			}
+
+			if (e.active === "inkSpot") {
+				for (const cell of state.cells) {
+					if (!cell.alive) continue;
+					for (const spot of e.spots) {
+						if (distSq(cell.x, cell.y, spot.x, spot.y) < spot.r * spot.r) {
+							cell.effects.slowUntil = Math.max(cell.effects.slowUntil, state.time + .35);
+							if (cell.type === "player") cell.effects.inkUntil = Math.max(cell.effects.inkUntil, state.time + .9);
+							setMood(cell, "sujo", 1, .3);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		function addTrail(cell) {
+			const speed = Math.hypot(cell.vx, cell.vy);
+			if (speed < 18 || state.time < cell.nextTrailAt) return;
+			cell.nextTrailAt = state.time + (cell.type === "player" ? .075 : .13);
+			state.trails.push({
+				x: cell.x + rand(-cell.radius * .12, cell.radius * .12),
+				y: cell.y + rand(-cell.radius * .12, cell.radius * .12),
+				r: clamp(cell.radius * rand(.22, .42), 7, 28),
+				color: cell.color,
+				ownerId: cell.id,
+				ownerType: cell.type,
+				life: rand(9, 16),
+				maxLife: 16,
+				seed: Math.random() * 9999
+			});
+			if (state.trails.length > 1100) state.trails.splice(0, state.trails.length - 1100);
+		}
+
+		function updateTrails(dt) {
+			if (!activeMode().trails) return;
+
+			for (const cell of state.cells) {
+				if (cell.alive) addTrail(cell);
+			}
+
+			for (let i = state.trails.length - 1; i >= 0; i--) {
+				const t = state.trails[i];
+				t.life -= dt;
+				t.r += dt * .85;
+				if (t.life <= 0) state.trails.splice(i, 1);
+			}
+
+			for (const cell of state.cells) {
+				if (!cell.alive) continue;
+				let boosted = false;
+				for (let i = state.trails.length - 1; i >= 0; i -= 2) {
+					const t = state.trails[i];
+					const reach = cell.radius * .34 + t.r;
+					if (distSq(cell.x, cell.y, t.x, t.y) > reach * reach) continue;
+					if (t.ownerId === cell.id) {
+						cell.effects.paintBoostUntil = Math.max(cell.effects.paintBoostUntil, state.time + .22);
+						boosted = true;
+					} else {
+						cell.effects.slowUntil = Math.max(cell.effects.slowUntil, state.time + .16);
+						if (cell.type === "player") setMood(cell, "bobo", .55, .22);
+					}
+					break;
+				}
+				if (boosted && cell.type === "player") state.stats.trailBoostSeconds += dt;
+			}
+		}
+
+		function usePowerUp(cell, powerup) {
+			if (!cell.alive || !powerup.alive) return;
+			const type = powerup.type;
+			cell.lastAteAt = state.time;
+			setMood(cell, "feliz", 1.15, .7);
+			if (type === "brush") {
+				const target = cell.type === "player" ? state.input : { worldX: cell.wanderX, worldY: cell.wanderY };
+				const dir = norm((target.worldX || cell.wanderX) - cell.x, (target.worldY || cell.wanderY) - cell.y);
+				cell.vx += dir.x * 420; cell.vy += dir.y * 420;
+				cell.effects.speedUntil = Math.max(cell.effects.speedUntil, state.time + 2.2);
+			}
+			else if (type === "watercolor") {
+				cell.effects.watercolorUntil = Math.max(cell.effects.watercolorUntil, state.time + 6.5);
+			}
+			else if (type === "stamp") {
+				for (let i = 0; i < 3; i++) state.decoys.push(new Decoy(cell, i / 3 * TAU + rand(-.45, .45)));
+			}
+			else if (type === "solvent") {
+				for (const other of state.cells) {
+					if (!other.alive || other === cell) continue;
+					const range = cell.radius + other.radius + 185;
+					if (distSq(cell.x, cell.y, other.x, other.y) < range * range) {
+						other.addMass(-Math.max(120, other.mass * .055));
+						other.effects.slowUntil = Math.max(other.effects.slowUntil, state.time + 1.3);
+						setMood(other, "sujo", 1, .55);
+					}
+				}
+			}
+			else if (type === "glue") {
+				cell.effects.glueUntil = Math.max(cell.effects.glueUntil, state.time + 7.5);
+			}
+			if (cell.type === "player") { state.stats.powerupsEaten++; showToast(powerupTypes[type].toast); }
+		}
+
+		function updatePowerups(dt) {
+			if (!activeMode().powerups) return;
+			if (state.runTime > state.nextPowerupSpawnAt) {
+				state.nextPowerupSpawnAt = state.runTime + rand(activeMode().zones ? 5.5 : 7.5, activeMode().zones ? 9.5 : 12.5);
+				let x = rand(140, config.arenaSize - 140), y = rand(140, config.arenaSize - 140);
+				if (activeMode().zones && Math.random() < .46) {
+					const table = state.zones.find(z => z.key === "painterTable");
+					if (table) { const a = rand(0, TAU), d = Math.sqrt(Math.random()) * table.r * .75; x = table.x + Math.cos(a) * d; y = table.y + Math.sin(a) * d; }
+				}
+				spawnPowerUp(clamp(x, 80, config.arenaSize - 80), clamp(y, 80, config.arenaSize - 80));
+			}
+
+			for (let i = state.powerups.length - 1; i >= 0; i--) {
+				const p = state.powerups[i];
+				p.life -= dt;
+				if (p.life <= 0 || !p.alive) { state.powerups.splice(i, 1); continue; }
+				for (const cell of state.cells) {
+					if (!cell.alive) continue;
+					const reach = cell.radius + p.radius * .8;
+					if (distSq(cell.x, cell.y, p.x, p.y) <= reach * reach) {
+						usePowerUp(cell, p);
+						p.alive = false;
+						state.powerups.splice(i, 1);
+						break;
+					}
+				}
+			}
+
+			for (const cell of state.cells) {
+				if (!cell.alive) continue;
+				if (cell.effects.watercolorUntil > state.time) {
+					for (let i = state.foods.length - 1; i >= 0; i--) {
+						const f = state.foods[i];
+						const range = cell.radius + 72;
+						if (distSq(cell.x, cell.y, f.x, f.y) < range * range) {
+							cell.addMass(f.mass * .82);
+							if (cell.type === "player") state.stats.foodsEaten++;
+							applySpecialFood(cell, f);
+							state.foods.splice(i, 1);
+						}
+					}
+				}
+				if (cell.effects.glueUntil > state.time) {
+					for (const other of state.cells) {
+						if (!other.alive || other === cell) continue;
+						const range = cell.radius + other.radius + 90;
+						if (distSq(cell.x, cell.y, other.x, other.y) < range * range) {
+							other.effects.slowUntil = Math.max(other.effects.slowUntil, state.time + .35);
+							setMood(other, "bobo", .65, .25);
+						}
+					}
+				}
+			}
+		}
+
+		function updateDecoys(dt) {
+			for (let i = state.decoys.length - 1; i >= 0; i--) {
+				const d = state.decoys[i];
+				d.life -= dt;
+				d.vx *= Math.exp(-dt * .8); d.vy *= Math.exp(-dt * .8);
+				d.x = clamp(d.x + d.vx * dt, 40, config.arenaSize - 40);
+				d.y = clamp(d.y + d.vy * dt, 40, config.arenaSize - 40);
+				d.visual.x = d.x; d.visual.y = d.y; d.visual.radius = d.radius;
+				if (d.life <= 0) state.decoys.splice(i, 1);
+			}
+		}
+
+		function zoneAt(x, y) {
+			if (!activeMode().zones) return null;
+			for (const z of state.zones) if (distSq(x, y, z.x, z.y) < z.r * z.r) return z;
+			return null;
+		}
+
+		function updateZones(dt) {
+			if (!activeMode().zones) return;
+			if (state.runTime > state.nextZoneBurstAt) {
+				state.nextZoneBurstAt = state.runTime + 2.8;
+				const garden = state.zones.find(z => z.key === "garden");
+				if (garden) spawnFoodBurst(garden.x, garden.y, 5, garden.r * .78);
+				const table = state.zones.find(z => z.key === "painterTable");
+				if (table && activeMode().powerups && Math.random() < .55) spawnPowerUp(table.x + rand(-table.r * .55, table.r * .55), table.y + rand(-table.r * .55, table.r * .55));
+			}
+
+			for (const cell of state.cells) {
+				if (!cell.alive) continue;
+				const z = zoneAt(cell.x, cell.y);
+				cell.currentZone = z ? z.key : null;
+				if (!z) continue;
+				if (cell.type === "player") state.stats.zoneSeconds += dt;
+				if (z.key === "garden") {
+					cell.effects.zoneUntil = Math.max(cell.effects.zoneUntil, state.time + .35);
+					if (cell.mass < 1400) cell.addMass(3.5 * dt);
+				}
+				else if (z.key === "inkLake") {
+					cell.effects.slowUntil = Math.max(cell.effects.slowUntil, state.time + .35);
+					if (cell.type === "player") cell.effects.inkUntil = Math.max(cell.effects.inkUntil, state.time + .25);
+					setMood(cell, "sujo", .85, .28);
+				}
+				else if (z.key === "vineGrove") {
+					if (cell.radius > 34) cell.effects.slowUntil = Math.max(cell.effects.slowUntil, state.time + .35);
+					else cell.effects.zoneUntil = Math.max(cell.effects.zoneUntil, state.time + .28);
+				}
+				else if (z.key === "painterTable") {
+					cell.effects.zoneUntil = Math.max(cell.effects.zoneUntil, state.time + .4);
+				}
+				else if (z.key === "dryStain") {
+					cell.addMass(-7 * dt);
+					cell.effects.slowUntil = Math.max(cell.effects.slowUntil, state.time + .15);
+					if (cell.type === "player" && cell.mass <= 210) showGameOver("a mancha seca");
+				}
+			}
+		}
+
+		function updatePlayer(dt) {
+			const p = state.player; if (!p || !p.alive) return;
+			updateInputWorld();
+			if (p.effects.inkUntil > state.time) {
+				const wobble = Math.sin(state.time * 6) * 60;
+				p.moveToward(state.input.worldX + wobble, state.input.worldY - wobble * .7, dt, .92);
+			} else if (state.input.hasPointer) p.moveToward(state.input.worldX, state.input.worldY, dt, 1);
+			else { p.vx *= Math.exp(-dt * 5); p.vy *= Math.exp(-dt * 5); p.x += p.vx * dt; p.y += p.vy * dt; p.keepInsideArena(); }
+			updatePlayerMood(p);
+		}
+
+		function updatePlayerMood(player) {
+			let threatNear = false; let preyNear = false; let closestThreatD2 = Infinity;
+			for (const other of state.cells) {
+				if (!other.alive || other === player) continue;
+				const d2 = distSq(player.x, player.y, other.x, other.y);
+				if (other.radius > player.radius * 1.18 && d2 < 520 * 520) { threatNear = true; closestThreatD2 = Math.min(closestThreatD2, d2); }
+				if (player.radius > other.radius * 1.24 && d2 < 360 * 360) preyNear = true;
+			}
+			if (activeMode().vines && !isInsideSafeZone(player)) threatNear = true;
+			state.stats.playerThreatNear = threatNear;
+			if (player.effects.shieldUntil > state.time) setMood(player, "verniz", 1.1, .26);
+			else if (player.effects.inkUntil > state.time) setMood(player, "sujo", 1, .26);
+			else if (state.time - player.lastAteAt < .45) setMood(player, "feliz", 1, .22);
+			else if (threatNear) setMood(player, "assustado", clamp(1.4 - Math.sqrt(closestThreatD2) / 520, .35, 1.35), .25);
+			else if (preyNear) setMood(player, "caçando", .8, .25);
+			else clearExpiredMood(player);
+		}
+
+		function findNearestFood(cell, maxRange, preferSpecial = false) {
+			let best = null; let bestD2 = maxRange * maxRange;
+			for (const f of state.foods) {
+				if (!f.alive) continue;
+				const d2 = distSq(cell.x, cell.y, f.x, f.y) * (preferSpecial && f.special ? .38 : 1);
+				if (d2 < bestD2) { bestD2 = d2; best = f; }
+			}
+			return best;
+		}
+
+		function updateBot(bot, dt, now) {
+			if (!bot.alive) return;
+			const p = bot.personality;
+			const teaTime = isEventActive("tea");
+
+			if (teaTime) setMood(bot, "feliz", .7, .32);
+
+			if (activeMode().vines && !isInsideSafeZone(bot)) {
+				setMood(bot, "assustado", 1.25, .3);
+				bot.moveToward(state.vines.centerX + rand(-80, 80), state.vines.centerY + rand(-80, 80), dt, 1.18);
+				return;
+			}
+
+			let threat = null; let threatD2 = Infinity; let prey = null; let preyD2 = Infinity;
+			const fearRange = (390 + bot.radius * 5.4) * p.fear * (teaTime ? .75 : 1);
+			const huntRange = (280 + bot.radius * 4.8) * p.hunt * (teaTime ? .28 : 1);
+			for (const other of state.cells) {
+				if (!other.alive || other === bot) continue;
+				const d2 = distSq(bot.x, bot.y, other.x, other.y);
+				if (other.radius > bot.radius * 1.18 && d2 < fearRange * fearRange && d2 < threatD2) { threatD2 = d2; threat = other; }
+				if (bot.radius > other.radius * 1.25 && d2 < huntRange * huntRange && d2 < preyD2) { preyD2 = d2; prey = other; }
+			}
+			if (threat) { const away = norm(bot.x - threat.x, bot.y - threat.y); setMood(bot, "assustado", 1.1, .3); bot.moveToward(bot.x + away.x * 760, bot.y + away.y * 760, dt, 1.14); return; }
+			if (!teaTime && prey && p.hunt > .55) { setMood(bot, "caçando", p.hunt, .28); bot.moveToward(prey.x, prey.y, dt, .94 + p.hunt * .1); return; }
+			if (activeMode().powerups && state.decoys.length && p.key !== "coward") {
+				let bestDecoy = null, bestDecoyD2 = 520 * 520;
+				for (const d of state.decoys) { const d2 = distSq(bot.x, bot.y, d.x, d.y); if (d2 < bestDecoyD2) { bestDecoyD2 = d2; bestDecoy = d; } }
+				if (bestDecoy && Math.random() < .035) { bot.wanderX = bestDecoy.x; bot.wanderY = bestDecoy.y; setMood(bot, "caçando", .75, .22); bot.moveToward(bestDecoy.x, bestDecoy.y, dt, .92); return; }
+			}
+
+			if (activeMode().powerups && state.powerups.length && (p.key === "hunter" || p.key === "nervous" || p.key === "glutton")) {
+				let bestPower = null, bestPowerD2 = 520 * 520;
+				for (const item of state.powerups) { const d2 = distSq(bot.x, bot.y, item.x, item.y); if (d2 < bestPowerD2) { bestPowerD2 = d2; bestPower = item; } }
+				if (bestPower) { setMood(bot, "faminto", 1.15, .22); bot.moveToward(bestPower.x, bestPower.y, dt, .98); return; }
+			}
+			const food = findNearestFood(bot, 360 + 280 * p.food, p.key === "glutton" || p.key === "nervous");
+			if (food) { setMood(bot, "faminto", p.food, .22); bot.moveToward(food.x, food.y, dt, .86 + p.food * .08); return; }
+			if (now > bot.nextThink || distSq(bot.x, bot.y, bot.wanderX, bot.wanderY) < 80 * 80) {
+				bot.nextThink = now + rand(p.thinkMin, p.thinkMax);
+				const spread = activeMode().vines ? state.vines.currentRadius * .75 : 780;
+				const baseX = activeMode().vines ? state.vines.centerX : bot.x;
+				const baseY = activeMode().vines ? state.vines.centerY : bot.y;
+				bot.wanderX = clamp(baseX + rand(-spread, spread), 70, config.arenaSize - 70);
+				bot.wanderY = clamp(baseY + rand(-spread, spread), 70, config.arenaSize - 70);
+			}
+			let tx = bot.wanderX; let ty = bot.wanderY;
+			if (p.key === "goofy") { tx += Math.sin(now * 3.1 + bot.seed) * 170; ty += Math.cos(now * 2.7 + bot.seed) * 170; setMood(bot, "bobo", .9, .25); }
+			else if (p.key === "nervous") { tx += Math.sin(now * 8.5 + bot.seed) * 70; ty += Math.cos(now * 9.1 + bot.seed) * 70; setMood(bot, "nervoso", 1.1, .18); }
+			else clearExpiredMood(bot);
+			bot.moveToward(tx, ty, dt, .72);
+		}
+
+		function updateBots(dt, now) {
+			for (const c of state.cells) if (c.type === "bot") updateBot(c, dt, now);
+			if (now > state.nextBotRespawnTick) {
+				state.nextBotRespawnTick = now + 1;
+				const living = state.cells.filter(c => c.alive && c.type === "bot").length;
+				if (living < config.botTarget) spawnBot();
+			}
+		}
+
+		function applySpecialFood(cell, food) {
+			if (!food.special) return;
+			const type = food.special;
+			cell.lastAteAt = state.time;
+			if (type === "gold") { cell.addMass(850); cell.rewardUntil = state.time + 2.8; }
+			else if (type === "blue") cell.effects.speedUntil = Math.max(cell.effects.speedUntil, state.time + 7.5);
+			else if (type === "pink") cell.effects.shieldUntil = Math.max(cell.effects.shieldUntil, state.time + 8.5);
+			else if (type === "green") cell.addMass(520);
+			else if (type === "black") cell.effects.inkUntil = Math.max(cell.effects.inkUntil, state.time + (cell.type === "player" ? 6.5 : 3.0));
+			setMood(cell, type === "black" ? "sujo" : "feliz", 1.2, .8);
+			if (cell.type === "player") { state.stats.specialEaten++; showToast(specialTypes[type].toast); }
+		}
+
+		function handleFoodEating() {
+			for (const cell of state.cells) {
+				if (!cell.alive) continue;
+				for (let i = state.foods.length - 1; i >= 0; i--) {
+					const food = state.foods[i]; if (!food.alive) continue;
+					const eatDistance = cell.radius + food.radius * .58;
+					if (distSq(cell.x, cell.y, food.x, food.y) <= eatDistance * eatDistance) {
+						cell.addMass(food.mass); cell.lastAteAt = state.time; setMood(cell, "feliz", .75, .28);
+						if (cell.type === "player") state.stats.foodsEaten++;
+						applySpecialFood(cell, food);
+						food.alive = false; state.foods.splice(i, 1);
+					}
+				}
+			}
+			const missing = config.foodTarget - state.foods.length;
+			if (missing > 0) spawnFood(Math.min(missing, 12));
+		}
+
+		function canEat(eater, prey) {
+			const shielded = prey.effects.shieldUntil > state.time;
+			const needed = shielded ? 1.45 : 1.18;
+			return eater.radius > prey.radius * needed;
+		}
+
+		function tryEatCell(eater, prey) {
+			if (!eater.alive || !prey.alive || eater === prey) return false;
+			if (!canEat(eater, prey)) return false;
+			const centerLimit = eater.radius - prey.radius * (prey.effects.shieldUntil > state.time ? .04 : .18);
+			if (centerLimit <= 0) return false;
+			if (distSq(eater.x, eater.y, prey.x, prey.y) < centerLimit * centerLimit) {
+				eater.addMass(prey.mass * .86); eater.lastAteAt = state.time; setMood(eater, "feliz", 1.15, .7); prey.alive = false;
+				if (eater.type === "player" && prey.type === "bot") state.stats.botsEaten++;
+				if (prey.type === "player") showGameOver(eater.name);
+				return true;
+			}
+			return false;
+		}
+
+		function handleCellEating() {
+			const alive = state.cells.filter(c => c.alive);
+			for (let i = 0; i < alive.length; i++) for (let j = i + 1; j < alive.length; j++) {
+				const a = alive[i]; const b = alive[j];
+				if (a.radius > b.radius) tryEatCell(a, b); else tryEatCell(b, a);
+			}
+			state.cells = state.cells.filter(c => c.alive || c.type === "player");
+		}
+
+		function updateRankStats() {
+			const sorted = state.cells.filter(c => c.alive).sort((a, b) => b.mass - a.mass);
+			state.stats.playerRank = sorted.findIndex(c => c === state.player) + 1 || 999;
+		}
+
+		function updateCamera(dt) {
+			const p = state.player; if (!p) return;
+			const tx = p.alive ? p.x : state.camera.x; const ty = p.alive ? p.y : state.camera.y;
+			const targetZoom = clamp(1.05 - (p.radius - 24) * .0068, .34, 1.05);
+			const t = 1 - Math.exp(-dt * config.cameraSmooth);
+			state.camera.x = lerp(state.camera.x, tx, t); state.camera.y = lerp(state.camera.y, ty, t); state.camera.zoom = lerp(state.camera.zoom, targetZoom, t * .85);
+		}
+
+		function moodJitterFor(e) {
+			let extra = 0;
+			if (e.mood === "assustado") extra += 2.3 * e.moodStrength;
+			if (e.mood === "nervoso") extra += 1.8 * e.moodStrength;
+			if (e.mood === "bobo") extra += .8 * e.moodStrength;
+			if (e.mood === "sujo") extra += 1.2;
+			if (e.personality) extra += e.personality.jitter * .35;
+			if (e.rewardUntil > state.time) extra += .6;
+			return extra;
+		}
+
+		function updateVisualSnapshots(now) {
+			const all = [...state.foods, ...state.powerups, ...state.decoys, ...state.cells];
+			if (!config.stopMotion) {
+				for (const e of all) { e.visual.x = e.x; e.visual.y = e.y; e.visual.radius = e.radius; e.visual.jx = 0; e.visual.jy = 0; e.visual.squash = 1; e.visual.pulse = Math.max(0, e.visual.pulse - .1); }
+				return;
+			}
+			if (now < state.nextVisualTick) return;
+			state.nextVisualTick = now + 1 / config.visualStepFps;
+			for (const e of all) {
+				const n1 = hashNoise(e.seed + now * 19.17); const n2 = hashNoise(e.seed + now * 31.71); const n3 = hashNoise(e.seed + now * 7.91);
+				const extra = e instanceof Cell ? moodJitterFor(e) : (e.special ? 1.5 : 0);
+				e.visual.x = e.x; e.visual.y = e.y; e.visual.radius = e.radius;
+				e.visual.jx = (n1 - .5) * (config.jitterStrength + extra); e.visual.jy = (n2 - .5) * (config.jitterStrength + extra);
+				let squash = 1 + (n3 - .5) * .022;
+				if (e instanceof Cell) { if (e.mood === "assustado") squash += Math.sin(now * 18 + e.seed) * .018; if (e.mood === "feliz") squash += .028; if (e.mood === "caçando") squash -= .018; }
+				e.visual.squash = squash; e.visual.pulse = e instanceof Cell && state.time - e.lastAteAt < .35 ? 1 : 0;
+			}
+		}
+
+		function updateHud(force = false) {
+			if (state.mode !== "playing") return;
+			const now = performance.now() / 1000; if (!force && now < state.nextHudTick) return; state.nextHudTick = now + .16;
+			const sorted = state.cells.filter(c => c.alive).sort((a, b) => b.mass - a.mass);
+			const p = state.player; const rank = sorted.findIndex(c => c === p) + 1; const mass = p ? Math.round(p.mass / 10) : 0;
+			massText.textContent = `Massa ${mass}`;
+			rankText.textContent = p && p.alive ? `posição #${rank || "-"} · missões ${state.stats.missionsCompleted}` : "absorvido";
+			const info = activeMode(); modeTitle.textContent = info.title;
+			if (info.events && state.eventState.active) {
+				const left = Math.max(0, Math.ceil(state.eventState.until - state.time));
+				modeText.textContent = `Evento: ${eventLabel(state.eventState.active)} · ${left}s restantes.`;
+			} else if (info.vines) {
+				const safe = Math.max(0, Math.round(state.vines.currentRadius));
+				const pct = Math.round((state.vines.currentRadius / state.vines.startRadius) * 100);
+				modeText.textContent = `Zona segura: ${safe}px · ${pct}% restante. Fique longe das trepadeiras.`;
+			} else if (info.zones && state.player && state.player.currentZone) {
+				const zone = state.zones.find(z => z.key === state.player.currentZone);
+				modeText.textContent = zone ? `${zone.name}: ${zone.desc}.` : `Zonas do mapa ativas.`;
+			} else if (info.zones) modeText.textContent = `Zonas do mapa ativas: jardim, lago de tinta, bosque, mesa do pintor e mancha seca.`;
+			else if (info.powerups) modeText.textContent = `Power-ups ativos: pincelada, aquarela, carimbo, solvente e cola.`;
+			else if (info.trails) modeText.textContent = `Rastros ativos: sua tinta dá impulso; tinta rival deixa o chão escorregadio.`;
+			else if (info.events) modeText.textContent = `Eventos vivos ativos. Próximo evento em breve.`;
+			else if (info.special) modeText.textContent = `Gotas especiais ativas: ouro, azul, verniz, verde e tinta preta.`;
+			else modeText.textContent = `Base ativa: bots com personalidade, humor, carinhas e mini-missões.`;
+
+			leaderboardRows.innerHTML = "";
+			for (let i = 0; i < Math.min(5, sorted.length); i++) {
+				const c = sorted[i]; const tag = c.type === "player" ? "Você" : c.personality ? c.personality.short : "Blob";
+				const row = document.createElement("div"); row.className = "leader-row" + (c.type === "player" ? " player" : "");
+				row.innerHTML = `<span>#${i + 1}</span><span>${c.name}</span><span>${tag} · ${Math.round(c.mass / 10)}</span>`;
+				leaderboardRows.appendChild(row);
+			}
+			if (state.mission) {
+				const m = state.mission; const progress = clamp(m.value / m.target, 0, 1);
+				missionText.textContent = m.title; missionBar.style.width = `${Math.round(progress * 100)}%`;
+				missionNote.textContent = `${Math.floor(m.value)}/${Math.round(m.target)} · recompensa: massa + brilho`;
+			}
+		}
+
+		function update(dt, now) {
+			if (state.mode !== "playing" || state.paused) { updateVisualSnapshots(now); updateToast(); return; }
+			state.runTime += dt;
+			updateEvents(dt); updateZones(dt); updatePlayer(dt); updateBots(dt, now); updateVines(dt); updateTrails(dt); updatePowerups(dt); updateDecoys(dt); handleFoodEating(); handleCellEating(); updateRankStats(); updateMission(dt); updateCamera(dt); updateVisualSnapshots(now); updateHud(false); updateToast();
+		}
+
+		function isVisible(x, y, radius) {
+			const halfW = innerWidth / (2 * state.camera.zoom) + radius + 90;
+			const halfH = innerHeight / (2 * state.camera.zoom) + radius + 90;
+			return x > state.camera.x - halfW && x < state.camera.x + halfW && y > state.camera.y - halfH && y < state.camera.y + halfH;
+		}
+
+		function drawBlobPath(x, y, r, seed, wobble = .035) {
+			const steps = 34; ctx.beginPath();
+			for (let i = 0; i <= steps; i++) {
+				const a = (i / steps) * TAU;
+				const wave = Math.sin(a * 3 + seed) * wobble + Math.sin(a * 7 + seed * .71) * wobble * .55 + Math.sin(a * 11 + seed * 1.37) * wobble * .3;
+				const rr = r * (1 + wave); const px = x + Math.cos(a) * rr; const py = y + Math.sin(a) * rr;
+				if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+			}
+			ctx.closePath();
+		}
+
+		function moodTint(c) {
+			if (c.effects.shieldUntil > state.time) return "rgba(255, 188, 211, .35)";
+			if (c.effects.speedUntil > state.time) return "rgba(130, 202, 232, .30)";
+			if (c.effects.paintBoostUntil > state.time) return "rgba(255, 238, 168, .20)";
+			if (c.effects.inkUntil > state.time) return "rgba(30, 28, 32, .22)";
+			if (c.rewardUntil > state.time) return "rgba(255, 222, 122, .34)";
+			if (c.mood === "assustado") return "rgba(255,255,255,.24)";
+			if (c.mood === "caçando") return "rgba(255,181,159,.22)";
+			if (c.mood === "faminto") return "rgba(255,228,138,.22)";
+			if (c.mood === "feliz") return "rgba(255,255,255,.28)";
+			if (c.mood === "bobo") return "rgba(213,191,232,.22)";
+			if (c.mood === "nervoso") return "rgba(255,255,255,.18)";
+			return "rgba(255,255,255,.10)";
+		}
+
+		function drawFace(c, x, y, r) {
+			if (r < 16) return;
+			const eyeY = y - r * .12, eyeDX = r * .26, eyeR = clamp(r * .075, 2.2, 5.2), pupilR = eyeR * .48;
+			const d = norm(c.vx, c.vy); const lookX = clamp(d.x * eyeR * .65, -eyeR * .7, eyeR * .7); const lookY = clamp(d.y * eyeR * .45, -eyeR * .5, eyeR * .5);
+			const scared = c.mood === "assustado", hunting = c.mood === "caçando", happy = c.mood === "feliz" || c.effects.speedUntil > state.time || c.effects.shieldUntil > state.time || c.effects.paintBoostUntil > state.time;
+			const hungry = c.mood === "faminto", goofy = c.mood === "bobo", nervous = c.mood === "nervoso", dirty = c.effects.inkUntil > state.time;
+			ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+			ctx.fillStyle = dirty ? "rgba(235,235,225,.62)" : "rgba(255,255,255,.72)"; ctx.strokeStyle = "rgba(70,57,45,.16)"; ctx.lineWidth = Math.max(1, r * .018);
+			const leftEyeY = goofy ? eyeY - r * .03 : eyeY, rightEyeY = goofy ? eyeY + r * .04 : eyeY;
+			ctx.beginPath(); ctx.arc(x - eyeDX, leftEyeY, scared ? eyeR * 1.25 : eyeR, 0, TAU); ctx.fill(); ctx.stroke();
+			ctx.beginPath(); ctx.arc(x + eyeDX, rightEyeY, scared ? eyeR * 1.25 : eyeR, 0, TAU); ctx.fill(); ctx.stroke();
+			ctx.fillStyle = dirty ? "rgba(25,23,25,.82)" : "rgba(62,54,47,.78)";
+			ctx.beginPath(); ctx.arc(x - eyeDX + lookX, leftEyeY + lookY, pupilR, 0, TAU); ctx.fill();
+			ctx.beginPath(); ctx.arc(x + eyeDX + lookX, rightEyeY + lookY, pupilR, 0, TAU); ctx.fill();
+			if (hunting) { ctx.strokeStyle = "rgba(68,55,43,.58)"; ctx.lineWidth = Math.max(1.2, r * .035); ctx.beginPath(); ctx.moveTo(x - eyeDX - eyeR * 1.4, eyeY - eyeR * 1.55); ctx.lineTo(x - eyeDX + eyeR * 1.2, eyeY - eyeR * .95); ctx.moveTo(x + eyeDX - eyeR * 1.2, eyeY - eyeR * .95); ctx.lineTo(x + eyeDX + eyeR * 1.4, eyeY - eyeR * 1.55); ctx.stroke(); }
+			const mouthY = y + r * .22; ctx.strokeStyle = "rgba(66,54,43,.62)"; ctx.fillStyle = "rgba(66,54,43,.52)"; ctx.lineWidth = Math.max(1.4, r * .035);
+			if (scared) { ctx.beginPath(); ctx.ellipse(x, mouthY, r * .08, r * .115, 0, 0, TAU); ctx.fill(); }
+			else if (dirty) { ctx.beginPath(); ctx.moveTo(x - r * .13, mouthY); ctx.lineTo(x + r * .13, mouthY + r * .02); ctx.stroke(); }
+			else if (happy || hungry) { ctx.beginPath(); ctx.arc(x, mouthY - r * .08, r * .23, .15 * Math.PI, .85 * Math.PI); ctx.stroke(); if (hungry) { ctx.beginPath(); ctx.ellipse(x + r * .06, mouthY + r * .05, r * .055, r * .075, .15, 0, TAU); ctx.fillStyle = "rgba(230,132,142,.54)"; ctx.fill(); } }
+			else if (goofy) { ctx.beginPath(); ctx.arc(x + r * .04, mouthY - r * .02, r * .19, .08 * Math.PI, .75 * Math.PI); ctx.stroke(); }
+			else if (nervous) { ctx.beginPath(); ctx.moveTo(x - r * .16, mouthY); ctx.lineTo(x - r * .08, mouthY + r * .04); ctx.lineTo(x, mouthY); ctx.lineTo(x + r * .08, mouthY + r * .04); ctx.lineTo(x + r * .16, mouthY); ctx.stroke(); }
+			else if (hunting) { ctx.beginPath(); ctx.moveTo(x - r * .14, mouthY); ctx.quadraticCurveTo(x, mouthY + r * .07, x + r * .18, mouthY - r * .02); ctx.stroke(); }
+			else { ctx.beginPath(); ctx.arc(x, mouthY - r * .03, r * .16, .18 * Math.PI, .82 * Math.PI); ctx.stroke(); }
+			ctx.restore();
+		}
+
+		function drawBlob(c) {
+			const v = c.visual, x = v.x + v.jx, y = v.y + v.jy, r = v.radius, pulse = v.pulse ? r * .045 : 0;
+			if (!isVisible(x, y, r)) return;
+			ctx.save(); ctx.translate(x, y); ctx.scale(v.squash || 1, 1 / (v.squash || 1)); ctx.translate(-x, -y);
+			ctx.beginPath(); ctx.ellipse(x + r * .08, y + r * .16, r * .9, r * .34, 0, 0, TAU); ctx.fillStyle = "rgba(80,55,35,.13)"; ctx.fill();
+			if (c.rewardUntil > state.time || c.effects.shieldUntil > state.time || c.effects.speedUntil > state.time || c.effects.paintBoostUntil > state.time) {
+				drawBlobPath(x, y, r + 12 + Math.sin(state.time * 8) * 2, c.seed + 9.2, .035);
+				ctx.fillStyle = c.effects.shieldUntil > state.time ? "rgba(255,188,211,.18)" : c.effects.speedUntil > state.time ? "rgba(130,202,232,.16)" : c.effects.paintBoostUntil > state.time ? "rgba(255,238,168,.14)" : "rgba(255,219,122,.16)"; ctx.fill();
+			}
+			drawBlobPath(x, y, r + pulse, c.seed, .04); ctx.fillStyle = c.color; ctx.globalAlpha = .93; ctx.fill(); ctx.globalAlpha = 1;
+			ctx.save(); ctx.clip();
+			for (let i = 0; i < 4; i++) { const a = c.seed + i * 1.7; const px = x + Math.cos(a) * r * randBySeed(c.seed + i, .02, .32); const py = y + Math.sin(a * 1.41) * r * randBySeed(c.seed + i * 4, .02, .32); ctx.beginPath(); ctx.arc(px, py, r * randBySeed(c.seed + i * 10, .25, .72), 0, TAU); ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,.13)" : "rgba(120,90,60,.035)"; ctx.fill(); }
+			ctx.beginPath(); ctx.arc(x - r * .15, y - r * .2, r * .62, 0, TAU); ctx.fillStyle = moodTint(c); ctx.fill(); ctx.restore();
+			ctx.lineWidth = Math.max(1.2, r * .035); ctx.strokeStyle = "rgba(77,63,45,.17)"; drawBlobPath(x, y, r + pulse, c.seed, .04); ctx.stroke();
+			if (c.type === "player") { ctx.lineWidth = Math.max(2.4, r * .06); ctx.strokeStyle = "rgba(49,119,111,.45)"; drawBlobPath(x, y, r + 3.5 + pulse, c.seed + 8.2, .03); ctx.stroke(); }
+			drawFace(c, x, y, r);
+			if (r > 18) { ctx.font = `900 ${clamp(r * .27, 10, 16)}px ui-rounded, Segoe UI, system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,.66)"; ctx.fillStyle = "rgba(72,62,53,.72)"; ctx.strokeText(c.name, x, y + r * .74); ctx.fillText(c.name, x, y + r * .74); }
+			ctx.restore();
+		}
+
+		function drawPowerUp(p) {
+			const v = p.visual, x = v.x + v.jx, y = v.y + v.jy, r = v.radius;
+			if (!isVisible(x, y, r + 16)) return;
+			ctx.save();
+			const alpha = clamp(p.life / 7, .25, 1);
+			ctx.globalAlpha = alpha;
+			ctx.beginPath();
+			ctx.arc(x, y, r + 10 + Math.sin(state.time * 6 + p.seed) * 2, 0, TAU);
+			ctx.fillStyle = "rgba(255, 255, 255, .24)";
+			ctx.fill();
+			drawBlobPath(x, y, r + 2, p.seed, .12);
+			ctx.fillStyle = p.color;
+			ctx.fill();
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = "rgba(80,65,45,.20)";
+			ctx.stroke();
+			ctx.font = `950 ${Math.max(15, r * .95)}px ui-rounded, Segoe UI, system-ui`;
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.lineWidth = 4;
+			ctx.strokeStyle = "rgba(255,255,255,.62)";
+			ctx.fillStyle = "rgba(72,62,53,.72)";
+			ctx.strokeText(p.icon, x, y + .5);
+			ctx.fillText(p.icon, x, y + .5);
+			ctx.restore();
+		}
+
+		function drawDecoy(d) {
+			const alpha = clamp(d.life / d.maxLife, 0, 1) * .48;
+			if (alpha <= .02 || !isVisible(d.x, d.y, d.radius + 20)) return;
+			ctx.save();
+			ctx.globalAlpha = alpha;
+			ctx.beginPath();
+			ctx.ellipse(d.x + d.radius * .08, d.y + d.radius * .16, d.radius * .9, d.radius * .34, 0, 0, TAU);
+			ctx.fillStyle = "rgba(80,55,35,.10)";
+			ctx.fill();
+			drawBlobPath(d.x, d.y, d.radius, d.seed, .05);
+			ctx.fillStyle = d.color;
+			ctx.fill();
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = "rgba(255,255,255,.48)";
+			ctx.stroke();
+			ctx.font = `900 ${clamp(d.radius * .26, 10, 15)}px ui-rounded, Segoe UI, system-ui`;
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.fillStyle = "rgba(72,62,53,.55)";
+			ctx.fillText("carimbo", d.x, d.y + d.radius * .72);
+			ctx.restore();
+		}
+
+		function drawFood(f) {
+			const v = f.visual, x = v.x + v.jx, y = v.y + v.jy, r = v.radius;
+			if (!isVisible(x, y, r)) return;
+			ctx.save();
+			if (f.special) { ctx.beginPath(); ctx.arc(x, y, r + 6 + Math.sin(state.time * 8 + f.seed) * 2, 0, TAU); ctx.fillStyle = f.special === "black" ? "rgba(30,28,32,.12)" : "rgba(255,255,255,.22)"; ctx.fill(); }
+			drawBlobPath(x, y, r, f.seed, f.special ? .16 : .11); ctx.fillStyle = f.color; ctx.globalAlpha = f.special ? .94 : .86; ctx.fill(); ctx.globalAlpha = 1;
+			ctx.lineWidth = f.special ? 1.4 : .8; ctx.strokeStyle = f.special === "black" ? "rgba(30,25,28,.28)" : "rgba(85,65,42,.12)"; ctx.stroke();
+			ctx.beginPath(); ctx.arc(x - r * .28, y - r * .25, r * .22, 0, TAU); ctx.fillStyle = "rgba(255,255,255,.22)"; ctx.fill();
+			if (f.special) { ctx.font = `900 ${Math.max(10, r * .9)}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = f.special === "black" ? "rgba(255,255,255,.7)" : "rgba(80,65,50,.55)"; const symbol = { gold: "+", blue: "→", pink: "◌", green: "♥", black: "!" }[f.special]; ctx.fillText(symbol, x, y + .5); }
+			ctx.restore();
+		}
+
+		function drawArenaBackground() {
+			const size = config.arenaSize; ctx.save(); ctx.fillStyle = state.bgPattern || "#f5ecd8"; ctx.fillRect(0, 0, size, size);
+			for (let i = 0; i < 50; i++) { const x = hashNoise(i * 11.3) * size, y = hashNoise(i * 19.7) * size, r = 120 + hashNoise(i * 31.9) * 420; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = i % 3 === 0 ? "rgba(169,200,216,.045)" : i % 3 === 1 ? "rgba(233,174,183,.04)" : "rgba(224,200,131,.042)"; ctx.fill(); }
+			const grid = 260, cam = state.camera, w = innerWidth / state.camera.zoom, h = innerHeight / state.camera.zoom;
+			const left = clamp(Math.floor((cam.x - w / 2) / grid) * grid, 0, size), right = clamp(Math.ceil((cam.x + w / 2) / grid) * grid, 0, size), top = clamp(Math.floor((cam.y - h / 2) / grid) * grid, 0, size), bottom = clamp(Math.ceil((cam.y + h / 2) / grid) * grid, 0, size);
+			ctx.beginPath(); for (let x = left; x <= right; x += grid) { ctx.moveTo(x, top); ctx.lineTo(x, bottom); } for (let y = top; y <= bottom; y += grid) { ctx.moveTo(left, y); ctx.lineTo(right, y); }
+			ctx.strokeStyle = "rgba(112,93,63,.045)"; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+		}
+
+		function drawLeaf(x, y, rotation, scale = 1) { ctx.save(); ctx.translate(x, y); ctx.rotate(rotation); ctx.beginPath(); ctx.ellipse(0, 0, 17 * scale, 8 * scale, 0, 0, TAU); ctx.fill(); ctx.restore(); }
+		function drawVinesOnArena() {
+			const size = config.arenaSize, step = 240; ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "rgba(101,139,91,.55)"; ctx.fillStyle = "rgba(130,166,119,.65)"; ctx.lineWidth = 7;
+			function vineSegment(x1, y1, x2, y2, vertical = false) { ctx.beginPath(); if (vertical) { const mid = (y1 + y2) / 2; ctx.moveTo(x1, y1); ctx.bezierCurveTo(x1 - 34, mid - 52, x2 + 28, mid + 52, x2, y2); } else { const mid = (x1 + x2) / 2; ctx.moveTo(x1, y1); ctx.bezierCurveTo(mid - 52, y1 - 30, mid + 52, y2 + 26, x2, y2); } ctx.stroke(); }
+			for (let x = 50; x < size - 50; x += step) { const wob = Math.sin(x * .006) * 22; vineSegment(x, 18 + wob, x + step * .7, 24 - wob, false); vineSegment(x, size - 22 - wob, x + step * .7, size - 30 + wob, false); drawLeaf(x + 80, 34 + wob, -.4); drawLeaf(x + 140, size - 40 - wob, .5); }
+			for (let y = 50; y < size - 50; y += step) { const wob = Math.cos(y * .006) * 22; vineSegment(20 + wob, y, 28 - wob, y + step * .7, true); vineSegment(size - 22 - wob, y, size - 30 + wob, y + step * .7, true); drawLeaf(42 + wob, y + 86, 1.2); drawLeaf(size - 42 - wob, y + 142, -1.2); }
+			ctx.restore();
+		}
+		function drawArenaBorder() { const size = config.arenaSize; ctx.save(); ctx.lineWidth = 18; ctx.strokeStyle = "rgba(111,90,61,.18)"; ctx.strokeRect(0, 0, size, size); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.strokeRect(12, 12, size - 24, size - 24); ctx.restore(); drawVinesOnArena(); }
+
+		function drawBattleVines() {
+			if (!activeMode().vines) return;
+			const v = state.vines;
+			ctx.save();
+			ctx.beginPath(); ctx.rect(0, 0, config.arenaSize, config.arenaSize); ctx.arc(v.centerX, v.centerY, v.currentRadius, 0, TAU, true); ctx.fillStyle = "rgba(77,116,66,.18)"; ctx.fill("evenodd");
+			ctx.beginPath(); ctx.arc(v.centerX, v.centerY, v.currentRadius, 0, TAU); ctx.strokeStyle = "rgba(97,142,82,.72)"; ctx.lineWidth = 14 + Math.sin(v.pulse * 4) * 2; ctx.stroke();
+			ctx.strokeStyle = "rgba(255,255,255,.22)"; ctx.lineWidth = 3; ctx.stroke();
+			ctx.fillStyle = "rgba(134,174,112,.75)";
+			const count = 90;
+			for (let i = 0; i < count; i++) {
+				const a = (i / count) * TAU + Math.sin(state.time * .4 + i) * .025;
+				const rr = v.currentRadius + Math.sin(i * 7.13 + state.time * 2) * 10;
+				const x = v.centerX + Math.cos(a) * rr;
+				const y = v.centerY + Math.sin(a) * rr;
+				if (isVisible(x, y, 45)) drawLeaf(x, y, a + Math.PI / 2, .75 + hashNoise(i) * .35);
+			}
+			ctx.restore();
+		}
+
+
+		function drawTrails() {
+			if (!activeMode().trails || !state.trails.length) return;
+			ctx.save();
+			for (const t of state.trails) {
+				const alpha = clamp(t.life / t.maxLife, 0, 1) * .22;
+				if (alpha <= .01 || !isVisible(t.x, t.y, t.r + 8)) continue;
+				ctx.globalAlpha = alpha;
+				drawBlobPath(t.x, t.y, t.r, t.seed, .18);
+				ctx.fillStyle = t.color;
+				ctx.fill();
+				ctx.globalAlpha = alpha * .72;
+				ctx.lineWidth = 1;
+				ctx.strokeStyle = "rgba(80,65,45,.16)";
+				ctx.stroke();
+			}
+			ctx.restore();
+		}
+
+		function drawZones() {
+			if (!activeMode().zones || !state.zones.length) return;
+			ctx.save();
+			for (const z of state.zones) {
+				if (!isVisible(z.x, z.y, z.r + 80)) continue;
+				const pulse = 1 + Math.sin(state.time * 1.7 + z.x * .01) * .015;
+				ctx.beginPath();
+				ctx.arc(z.x, z.y, z.r * pulse, 0, TAU);
+				ctx.fillStyle = z.color;
+				ctx.fill();
+				ctx.strokeStyle = z.stroke;
+				ctx.lineWidth = 5;
+				ctx.stroke();
+				ctx.save();
+				ctx.globalAlpha = .38;
+				ctx.strokeStyle = z.stroke;
+				ctx.lineWidth = 1.5;
+				for (let i = 0; i < 4; i++) {
+					ctx.beginPath();
+					ctx.arc(z.x, z.y, z.r * (.35 + i * .15), 0, TAU);
+					ctx.stroke();
+				}
+				ctx.restore();
+				if (z.key === "garden" || z.key === "vineGrove") {
+					ctx.fillStyle = "rgba(130,166,119,.50)";
+					for (let i = 0; i < 14; i++) {
+						const a = i / 14 * TAU + z.x * .001;
+						drawLeaf(z.x + Math.cos(a) * z.r * .62, z.y + Math.sin(a) * z.r * .62, a, .52);
+					}
+				}
+				if (z.key === "painterTable") {
+					ctx.fillStyle = "rgba(145, 101, 54, .11)";
+					ctx.fillRect(z.x - z.r * .58, z.y - z.r * .36, z.r * 1.16, z.r * .72);
+				}
+				ctx.font = "950 28px ui-rounded, Segoe UI, system-ui";
+				ctx.textAlign = "center";
+				ctx.textBaseline = "middle";
+				ctx.lineWidth = 5;
+				ctx.strokeStyle = "rgba(255,250,232,.72)";
+				ctx.fillStyle = "rgba(76,65,52,.62)";
+				ctx.strokeText(z.name, z.x, z.y - 10);
+				ctx.fillText(z.name, z.x, z.y - 10);
+				ctx.font = "850 15px ui-rounded, Segoe UI, system-ui";
+				ctx.strokeText(z.desc, z.x, z.y + 24);
+				ctx.fillText(z.desc, z.x, z.y + 24);
+			}
+			ctx.restore();
+		}
+
+		function drawEventOverlays() {
+			if (!activeMode().events || !state.eventState.active) return;
+			const e = state.eventState;
+			ctx.save();
+
+			if (e.active === "bloom") {
+				for (const spot of e.spots) {
+					if (!isVisible(spot.x, spot.y, spot.r + 50)) continue;
+					const pulse = 1 + Math.sin(state.time * 3 + spot.seed) * .04;
+					ctx.beginPath();
+					ctx.arc(spot.x, spot.y, spot.r * pulse, 0, TAU);
+					ctx.fillStyle = "rgba(169, 214, 143, .10)";
+					ctx.fill();
+					ctx.strokeStyle = "rgba(120, 168, 104, .22)";
+					ctx.lineWidth = 4;
+					ctx.stroke();
+					ctx.fillStyle = "rgba(130,166,119,.56)";
+					for (let i = 0; i < 10; i++) {
+						const a = i / 10 * TAU + spot.seed;
+						drawLeaf(spot.x + Math.cos(a) * spot.r * .72, spot.y + Math.sin(a) * spot.r * .72, a, .55);
+					}
+				}
+			}
+
+			if (e.active === "inkSpot") {
+				for (const spot of e.spots) {
+					if (!isVisible(spot.x, spot.y, spot.r + 60)) continue;
+					const pulse = 1 + Math.sin(state.time * 4 + spot.seed) * .035;
+					drawBlobPath(spot.x, spot.y, spot.r * pulse, spot.seed, .09);
+					ctx.fillStyle = "rgba(35, 31, 35, .20)";
+					ctx.fill();
+					ctx.strokeStyle = "rgba(25, 22, 25, .18)";
+					ctx.lineWidth = 3;
+					ctx.stroke();
+				}
+			}
+
+			if (e.active === "wind") {
+				const angle = Math.atan2(e.windY, e.windX);
+				ctx.strokeStyle = "rgba(128, 151, 161, .22)";
+				ctx.lineWidth = 5;
+				ctx.lineCap = "round";
+				for (let i = 0; i < 34; i++) {
+					const x = hashNoise(i * 8.7 + state.time * .25) * config.arenaSize;
+					const y = hashNoise(i * 13.4) * config.arenaSize;
+					if (!isVisible(x, y, 120)) continue;
+					const len = 60 + hashNoise(i * 3.1) * 120;
+					ctx.beginPath();
+					ctx.moveTo(x, y);
+					ctx.lineTo(x + Math.cos(angle) * len, y + Math.sin(angle) * len);
+					ctx.stroke();
+				}
+			}
+
+			if (e.active === "rain") {
+				ctx.fillStyle = "rgba(120, 160, 185, .18)";
+				for (let i = 0; i < 45; i++) {
+					const x = hashNoise(i * 5.2 + state.time * .8) * config.arenaSize;
+					const y = hashNoise(i * 9.8 + state.time * 1.1) * config.arenaSize;
+					if (!isVisible(x, y, 20)) continue;
+					ctx.beginPath();
+					ctx.ellipse(x, y, 4, 10, -.45, 0, TAU);
+					ctx.fill();
+				}
+			}
+
+			if (e.active === "tea") {
+				ctx.beginPath();
+				ctx.arc(state.camera.x, state.camera.y, 520 / Math.max(.45, state.camera.zoom), 0, TAU);
+				ctx.fillStyle = "rgba(232, 202, 142, .045)";
+				ctx.fill();
+			}
+
+			ctx.restore();
+		}
+
+		function drawWorld() {
+			ctx.save(); ctx.translate(innerWidth / 2, innerHeight / 2); ctx.scale(state.camera.zoom, state.camera.zoom); ctx.translate(-state.camera.x, -state.camera.y);
+			drawArenaBackground(); drawZones(); drawBattleVines(); drawEventOverlays(); drawTrails();
+			for (const f of state.foods) drawFood(f);
+			for (const p of state.powerups) drawPowerUp(p);
+			for (const d of state.decoys) drawDecoy(d);
+			for (const c of state.cells.filter(c => c.alive).sort((a, b) => a.radius - b.radius)) drawBlob(c);
+			drawArenaBorder(); ctx.restore();
+		}
+
+		function drawScreenTexture() {
+			ctx.save(); ctx.globalAlpha = .25; ctx.fillStyle = "rgba(255,255,255,.18)";
+			for (let i = 0; i < 28; i++) ctx.fillRect(hashNoise(i * 3.31 + performance.now() * .00002) * innerWidth, hashNoise(i * 8.17) * innerHeight, 1, 1);
+			ctx.restore();
+			const p = state.player;
+			if (p && p.effects.inkUntil > state.time) {
+				ctx.save();
+				const remaining = clamp((p.effects.inkUntil - state.time) / 6.5, 0, 1);
+				ctx.fillStyle = `rgba(33,29,33,${.10 + remaining * .18})`; ctx.fillRect(0, 0, innerWidth, innerHeight);
+				for (let i = 0; i < 18; i++) { ctx.beginPath(); ctx.arc(hashNoise(i * 9.2) * innerWidth, hashNoise(i * 17.4) * innerHeight, 18 + hashNoise(i * 4.7) * 80, 0, TAU); ctx.fillStyle = `rgba(20,18,22,${.05 + remaining * .08})`; ctx.fill(); }
+				ctx.restore();
+			}
+		}
+
+		function drawMenuBackdrop(now) {
+			ctx.save(); ctx.fillStyle = state.bgPattern || "#f5ecd8"; ctx.fillRect(0, 0, innerWidth, innerHeight);
+			for (let i = 0; i < 20; i++) { const x = hashNoise(i * 8.2) * innerWidth, y = hashNoise(i * 14.1) * innerHeight, r = 18 + hashNoise(i * 6.4) * 80; ctx.save(); ctx.globalAlpha = .18; ctx.translate(x + Math.sin(now * .18 + i) * 8, y + Math.cos(now * .14 + i) * 8); drawBlobPath(0, 0, r, i * 66.1, .055); ctx.fillStyle = pastelPalette[i % pastelPalette.length]; ctx.fill(); ctx.restore(); }
+			ctx.restore();
+		}
+
+		function drawMiniMap() {
+			if (state.mode !== "playing") return;
+			const w = miniCanvas.width, h = miniCanvas.height, pad = 18, size = config.arenaSize, scale = (w - pad * 2) / size;
+			miniCtx.clearRect(0, 0, w, h); miniCtx.fillStyle = "rgba(255,250,232,.58)"; miniCtx.fillRect(0, 0, w, h);
+			miniCtx.strokeStyle = "rgba(76,59,39,.18)"; miniCtx.lineWidth = 4; miniCtx.strokeRect(pad, pad, w - pad * 2, h - pad * 2);
+			if (activeMode().zones) {
+				for (const z of state.zones) { miniCtx.beginPath(); miniCtx.arc(pad + z.x * scale, pad + z.y * scale, z.r * scale, 0, TAU); miniCtx.fillStyle = z.color.replace(/rgba\(([^,]+),([^,]+),([^,]+),[^)]+\)/, "rgba($1,$2,$3,.18)"); miniCtx.fill(); }
+			}
+			if (activeMode().vines) { miniCtx.beginPath(); miniCtx.arc(pad + state.vines.centerX * scale, pad + state.vines.centerY * scale, state.vines.currentRadius * scale, 0, TAU); miniCtx.strokeStyle = "rgba(97,142,82,.72)"; miniCtx.lineWidth = 3; miniCtx.stroke(); }
+			for (const c of state.cells) { if (!c.alive) continue; miniCtx.beginPath(); miniCtx.arc(pad + c.x * scale, pad + c.y * scale, clamp(c.radius * scale, 2, 8), 0, TAU); miniCtx.fillStyle = c.type === "player" ? "#2f776f" : "rgba(92,76,57,.45)"; miniCtx.fill(); }
+		}
+
+		function render(now) {
+			const dpr = Math.max(1, Math.min(2, devicePixelRatio || 1)); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, innerWidth, innerHeight);
+			if (state.mode === "menu") drawMenuBackdrop(now); else drawWorld();
+			drawScreenTexture(); drawMiniMap();
+		}
+
+		function loop(timeMs) {
+			const now = timeMs / 1000; const dt = state.lastTime ? clamp(now - state.lastTime, 0, .034) : .016;
+			state.lastTime = now; state.time = now; update(dt, now); render(now); requestAnimationFrame(loop);
+		}
+
+		function togglePause() { if (state.mode !== "playing") return; state.paused = !state.paused; pauseButton.textContent = state.paused ? "Continuar" : "Pausar"; }
+		function bindEvents() {
+			addEventListener("resize", resize);
+			addEventListener("pointermove", e => { state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
+			addEventListener("pointerdown", e => { state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
+			addEventListener("keydown", e => {
+				if (e.key === "Escape" && modeDialog.classList.contains("active")) { closeModeDialog(); return; }
+				if (e.key.toLowerCase() === "p") togglePause();
+				if (e.key === "Escape" && state.mode === "playing") showMainMenu();
+			});
+			openModeDialogButton.addEventListener("click", openModeDialog);
+			closeModeDialogButton.addEventListener("click", closeModeDialog);
+			cancelModeDialogButton.addEventListener("click", closeModeDialog);
+			applyModeDialogButton.addEventListener("click", applyDraftMode);
+			modeDialog.addEventListener("click", event => { if (event.target === modeDialog) closeModeDialog(); });
+			document.querySelectorAll(".mode-option").forEach(option => option.addEventListener("click", () => { config.draftMode = option.dataset.mode; refreshDialogModeDetails(); }));
+			customSpecialToggle.addEventListener("change", () => { config.draftCustom.special = customSpecialToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
+			customVinesToggle.addEventListener("change", () => { config.draftCustom.vines = customVinesToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
+			customTrailsToggle.addEventListener("change", () => { config.draftCustom.trails = customTrailsToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
+			customEventsToggle.addEventListener("change", () => { config.draftCustom.events = customEventsToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
+			customPowerupsToggle.addEventListener("change", () => { config.draftCustom.powerups = customPowerupsToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
+			customZonesToggle.addEventListener("change", () => { config.draftCustom.zones = customZonesToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
+			startButton.addEventListener("click", resetGame);
+			demoButton.addEventListener("click", () => { setMenuValues({ bots: 14, foods: 380, stopMotion: true, fps: 10, jitter: 1.2, mode: "classic" }); resetGame(); });
+			hardButton.addEventListener("click", () => { setMenuValues({ bots: 52, foods: 950, stopMotion: true, fps: 12, jitter: 1.9, mode: "custom", custom: { special: true, vines: true, trails: true, events: true, powerups: true, zones: true } }); resetGame(); });
+			restartButton.addEventListener("click", resetGame); backToMenuButton.addEventListener("click", showMainMenu); pauseButton.addEventListener("click", togglePause);
+			hudStopMotionInput.addEventListener("change", () => { config.stopMotion = hudStopMotionInput.checked; menuStopMotionInput.checked = config.stopMotion; });
+			menuStopMotionInput.addEventListener("change", () => { config.stopMotion = menuStopMotionInput.checked; hudStopMotionInput.checked = config.stopMotion; });
+			for (const input of [botCountInput, foodCountInput, visualFpsInput, jitterStrengthInput]) input.addEventListener("input", syncLabels);
+			visualFpsInput.addEventListener("input", () => { config.visualStepFps = Number(visualFpsInput.value); });
+			jitterStrengthInput.addEventListener("input", () => { config.jitterStrength = Number(jitterStrengthInput.value); });
+		}
+
+		function boot() { resize(); createPaperPattern(); syncLabels(); refreshModeSummary(); refreshDialogModeDetails(); bindEvents(); requestAnimationFrame(loop); }
+		boot();
+	})();
+	</script>
+</body>
+</html>
