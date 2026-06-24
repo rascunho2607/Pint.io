@@ -30,15 +30,15 @@
 		.overlay {
 			position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
 			padding: 24px; pointer-events: auto;
-			background: radial-gradient(circle at 50% 44%, rgba(255,250,235,.58), rgba(235,221,190,.25));
-			backdrop-filter: blur(4px);
+			background: radial-gradient(circle at 50% 44%, rgba(255,250,235,.34), rgba(235,221,190,.12));
+			backdrop-filter: blur(2.5px);
 		}
 		.overlay.active { display: flex; }
 
 		.card {
 			position: relative; width: min(880px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto;
 			padding: 34px; border: 1px solid var(--stroke); border-radius: 34px;
-			background: linear-gradient(145deg, rgba(255,250,233,.97), rgba(242,226,196,.91));
+			background: linear-gradient(145deg, rgba(255,250,233,.92), rgba(242,226,196,.84));
 			box-shadow: 0 22px 80px rgba(77,58,36,.22), inset 0 1px 0 rgba(255,255,255,.82);
 		}
 		.card::before, .card::after {
@@ -80,28 +80,44 @@
 		}
 		.modal-overlay.active { display: flex; }
 		.mode-dialog {
-			width: min(920px, calc(100vw - 30px)); max-height: min(760px, calc(100vh - 30px)); overflow: auto;
+			width: min(920px, calc(100vw - 30px)); max-height: min(760px, calc(100vh - 30px)); overflow: hidden;
+			display: flex; flex-direction: column;
 			border-radius: 34px; border: 1px solid rgba(80,65,45,.12);
 			background: linear-gradient(145deg, rgba(255,250,235,.98), rgba(244,230,203,.96));
 			box-shadow: 0 28px 95px rgba(67, 48, 28, .28), inset 0 1px 0 rgba(255,255,255,.82);
 		}
-		.dialog-head { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; padding: 24px 24px 12px; }
+		.dialog-head { display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 22px 24px 14px; flex: 0 0 auto; }
 		.dialog-title { margin: 0; font-size: clamp(26px, 4vw, 42px); line-height: 1; letter-spacing: -.06em; font-weight: 950; color: #473f37; }
 		.dialog-subtitle { margin: 9px 0 0; max-width: 620px; color: #746a5f; font-size: 14px; line-height: 1.45; font-weight: 760; }
+		.dialog-actions-top { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; align-items: center; flex: 0 0 auto; }
 		.close-button { padding: 9px 13px; background: rgba(255,255,255,.46); }
-		.mode-picker-layout { display: grid; grid-template-columns: minmax(260px, .9fr) minmax(320px, 1.1fr); gap: 16px; padding: 12px 24px 24px; }
-		.mode-option-list { display: grid; gap: 10px; }
+		.apply-mode-button { padding: 10px 15px; background: linear-gradient(145deg, #f6dca2, #e7c47a); }
+		.mode-picker-layout { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 12px 24px 24px; overflow: auto; flex: 1 1 auto; }
+		.mode-option-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 		.mode-option {
-			position: relative; width: 100%; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start;
-			padding: 14px; border-radius: 24px; border: 1px solid rgba(80,65,45,.1); background: rgba(255,255,255,.36);
-			text-align: left; box-shadow: none; cursor: pointer;
+			position: relative; width: 100%; display: grid; grid-template-columns: 1fr; gap: 10px; align-items: start;
+			padding: 10px; border-radius: 24px; border: 1px solid rgba(80,65,45,.1); background: rgba(255,255,255,.34);
+			text-align: left; box-shadow: inset 0 1px 0 rgba(255,255,255,.68); cursor: pointer;
 		}
 		.mode-option:hover { transform: translateY(-1px); background: rgba(255,255,255,.52); }
-		.mode-option.active { border-color: rgba(47,119,111,.42); background: rgba(195,229,219,.42); box-shadow: inset 0 0 0 2px rgba(47,119,111,.12); }
-		.option-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 14px; background: rgba(255,255,255,.58); font-size: 18px; }
+		.mode-option.active { border-color: rgba(47,119,111,.42); background: rgba(195,229,219,.42); box-shadow: inset 0 0 0 2px rgba(47,119,111,.12), 0 10px 24px rgba(75,109,102,.08); }
+		.mode-card-illustration, .selected-mode-hero {
+			position: relative; width: 100%; aspect-ratio: 1.28; overflow: hidden; border-radius: 18px;
+			background: linear-gradient(180deg, rgba(252,249,236,.95), rgba(235,223,194,.95));
+			border: 1px solid rgba(80,65,45,.09); box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+		}
+		.mode-card-illustration::after, .selected-mode-hero::after {
+			content: ""; position: absolute; inset: 0; pointer-events: none;
+			background: radial-gradient(circle at 20% 18%, rgba(255,255,255,.35), transparent 24%), radial-gradient(circle at 84% 72%, rgba(228,205,160,.22), transparent 28%);
+		}
+		.mode-card-illustration svg, .selected-mode-hero svg { width: 100%; height: 100%; display: block; }
+		.mode-option-body { display: block; }
+		.mode-option-topline { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; font-weight: 950; color: #8a7c6f; }
 		.option-title, .option-desc { display: block; }
-		.option-title { font-size: 15px; font-weight: 950; color: #4d453d; }
-		.option-desc { margin-top: 4px; font-size: 12px; line-height: 1.38; font-weight: 750; color: #746a5f; }
+		.option-title { margin-top: 4px; font-size: 15px; font-weight: 950; line-height: 1.05; color: #4d453d; }
+		.option-desc { margin-top: 4px; font-size: 12px; line-height: 1.35; font-weight: 750; color: #746a5f; }
+		.selected-mode-hero { margin-top: 10px; aspect-ratio: 1.62; }
+		.mode-panel .selected-mode-title { margin-top: 10px; }
 		.mode-details { padding: 18px; border-radius: 28px; border: 1px solid rgba(80,65,45,.1); background: rgba(255,255,255,.34); }
 		.detail-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .13em; font-weight: 950; color: #85786b; }
 		.detail-title { margin-top: 6px; font-size: 25px; line-height: 1.05; letter-spacing: -.04em; font-weight: 950; color: #443d36; }
@@ -119,8 +135,6 @@
 		.switch input:disabled + .slider { opacity: .45; }
 		.always-on { font-size: 11px; font-weight: 950; color: #5f8d69; padding: 7px 9px; border-radius: 999px; background: rgba(143,191,156,.16); }
 		.locked-soon { font-size: 11px; font-weight: 950; color: #8a7c6f; padding: 7px 9px; border-radius: 999px; background: rgba(100,78,50,.08); }
-		.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 0 24px 24px; }
-
 		.grid { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
 		.box { padding: 16px; border-radius: 22px; background: rgba(255,255,255,.33); border: 1px solid rgba(80,65,45,.1); }
 		.box label { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; font-size: 13px; font-weight: 850; color: #5a5047; }
@@ -229,8 +243,88 @@
 
 		.toast.active { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+
+		.play-card {
+			width: min(980px, calc(100vw - 32px));
+			padding: 20px;
+			border-radius: 28px;
+			background: linear-gradient(145deg, rgba(255,250,235,.94), rgba(244,231,204,.9));
+			box-shadow: 0 24px 78px rgba(45,35,24,.26), inset 0 1px 0 rgba(255,255,255,.82);
+		}
+		.play-card::before, .play-card::after { display: none; }
+		.play-card h1 { margin: 4px 0 6px; font-size: clamp(46px, 7vw, 76px); }
+		.play-card .subtitle { margin: 0; max-width: 520px; font-size: 14px; font-weight: 760; }
+		.menu-compact-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 4px 4px 16px; }
+		.menu-notice {
+			min-width: 220px; max-width: 300px; padding: 12px 14px; border-radius: 20px;
+			background: rgba(255,255,255,.48); border: 1px solid rgba(80,65,45,.1);
+			font-size: 12px; line-height: 1.35; font-weight: 900; color: #62584d;
+			box-shadow: inset 0 1px 0 rgba(255,255,255,.65);
+		}
+		.menu-notice.alert { background: rgba(255,229,218,.72); color: #7d493b; border-color: rgba(158,75,48,.16); }
+		.menu-panels { display: grid; grid-template-columns: 1fr 1.05fr 1.15fr; gap: 12px; align-items: stretch; }
+		.menu-panel {
+			position: relative; padding: 16px; border-radius: 24px; border: 1px solid rgba(80,65,45,.1);
+			background: rgba(255,255,255,.44); box-shadow: inset 0 1px 0 rgba(255,255,255,.68);
+		}
+		.panel-kicker { font-size: 11px; text-transform: uppercase; letter-spacing: .13em; font-weight: 950; color: #8a7c6f; }
+		.panel-title, .room-title { margin-top: 4px; font-size: 22px; line-height: 1; letter-spacing: -.04em; font-weight: 950; color: #443d36; }
+		.player-preview-row { display: grid; grid-template-columns: 74px 1fr; gap: 12px; align-items: center; margin-top: 14px; }
+		.player-color-preview {
+			position: relative; width: 74px; height: 74px; border-radius: 22px;
+			background: linear-gradient(145deg, rgba(255,255,255,.55), rgba(230,216,190,.45));
+			border: 1px solid rgba(80,65,45,.08); display: grid; place-items: center;
+		}
+		.player-color-preview span {
+			display: block; width: 46px; height: 46px; border-radius: 50%; background: var(--player-color, #9fd6cf);
+			box-shadow: inset 0 -7px 0 rgba(70,50,30,.08), 0 5px 14px rgba(70,50,30,.14);
+		}
+		.name-field label, .color-label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 950; color: #75695d; }
+		.color-label { margin-top: 14px; }
+		.player-name-input {
+			width: 100%; height: 42px; padding: 0 13px; border-radius: 15px; border: 1px solid rgba(80,65,45,.15);
+			background: rgba(255,255,255,.68); color: #493f37; font: 900 15px ui-rounded, "Segoe UI", system-ui, sans-serif;
+			outline: none; user-select: text;
+		}
+		.player-name-input:focus { border-color: rgba(47,119,111,.45); box-shadow: 0 0 0 4px rgba(159,214,207,.22); }
+		.color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+		.color-swatch {
+			width: 100%; aspect-ratio: 1; min-height: 34px; padding: 0; border-radius: 14px;
+			background: var(--swatch); border: 3px solid rgba(255,255,255,.7); box-shadow: 0 5px 13px rgba(80,55,35,.12), inset 0 -5px 0 rgba(55,40,25,.08);
+		}
+		.color-swatch:hover { transform: translateY(-1px); filter: brightness(1.03); }
+		.color-swatch.active { outline: 3px solid rgba(47,119,111,.42); outline-offset: 2px; }
+		.play-panel { display: flex; flex-direction: column; justify-content: center; text-align: center; gap: 12px; }
+		.play-button {
+			width: 100%; min-height: 72px; border-radius: 24px; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.05em;
+			background: linear-gradient(145deg, #f8d879, #ebb451); color: #4d3c25;
+			box-shadow: 0 15px 34px rgba(124,84,28,.23), inset 0 1px 0 rgba(255,255,255,.76);
+		}
+		.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+		.quick-actions button { padding: 11px 13px; font-size: 13px; }
+		.play-hints { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; }
+		.play-hints span { padding: 7px 9px; border-radius: 999px; background: rgba(255,255,255,.48); border: 1px solid rgba(80,65,45,.08); font-size: 11px; font-weight: 900; color: #6d6258; }
+		.mode-panel .selected-mode-title { margin-top: 6px; }
+		.mode-panel .selected-mode-desc { min-height: 38px; }
+		.compact-tags { max-height: 58px; overflow: hidden; }
+		.mode-panel .select-mode-button { width: 100%; margin-top: 13px; }
+		.room-panel { margin-top: 12px; }
+		.room-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+		.room-pill { padding: 8px 10px; border-radius: 999px; background: rgba(159,214,207,.18); color: #4f746f; font-size: 11px; font-weight: 950; }
+		.room-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: center; }
+		.range-control, .check-control { display: grid; gap: 8px; font-size: 12px; font-weight: 900; color: #5a5047; }
+		.range-control span { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+		.range-control input[type="range"] { width: 100%; accent-color: #9fbfbb; }
+		.check-control { grid-template-columns: 1fr auto; align-items: center; min-height: 45px; padding: 10px 12px; border-radius: 18px; background: rgba(255,255,255,.36); border: 1px solid rgba(80,65,45,.08); }
+		.check-control input[type="checkbox"] { width: 19px; height: 19px; accent-color: #8fab83; }
+
 		@media (max-width: 950px) {
-			.grid, .mode-summary, .mode-picker-layout { grid-template-columns: 1fr; }
+			.grid, .mode-summary, .mode-picker-layout, .menu-panels, .room-grid { grid-template-columns: 1fr; }
+			.mode-option-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+			.menu-compact-head { flex-direction: column; }
+			.dialog-head { align-items: flex-start; flex-direction: column; }
+			.dialog-actions-top { width: 100%; justify-content: flex-start; }
+			.menu-notice { min-width: 0; max-width: none; width: 100%; }
 			.leaderboard { display: none; }
 			.mission { top: auto; bottom: 82px; width: min(430px, calc(100vw - 36px)); }
 			.touch-joystick-wrap { bottom: 110px; }
@@ -238,6 +332,11 @@
 		}
 		@media (max-width: 650px) {
 			.card { padding: 28px 20px; border-radius: 28px; }
+			.play-card { padding: 14px; }
+			.mode-option-list { grid-template-columns: 1fr; }
+			.player-preview-row { grid-template-columns: 58px 1fr; }
+			.player-color-preview { width: 58px; height: 58px; border-radius: 18px; }
+			.player-color-preview span { width: 38px; height: 38px; }
 			.mode-status { display: none; }
 			.minimap { width: 118px; height: 118px; }
 			.help { display: none; }
@@ -249,56 +348,77 @@
 
 	<div class="ui-layer">
 		<section id="mainMenu" class="overlay active">
-			<div class="card">
-				<div class="vine" aria-hidden="true">
-					<svg viewBox="0 0 900 80" preserveAspectRatio="none">
-						<path d="M-20 35 C 90 4, 140 68, 260 32 S 450 12, 560 35 S 760 70, 930 25" fill="none" stroke="rgba(101,139,91,.62)" stroke-width="5" stroke-linecap="round"/>
-						<g fill="rgba(130,166,119,.72)">
-							<ellipse cx="96" cy="22" rx="13" ry="7" transform="rotate(-25 96 22)"/><ellipse cx="182" cy="48" rx="14" ry="7" transform="rotate(28 182 48)"/>
-							<ellipse cx="296" cy="24" rx="12" ry="7" transform="rotate(-18 296 24)"/><ellipse cx="430" cy="18" rx="15" ry="8" transform="rotate(18 430 18)"/>
-							<ellipse cx="585" cy="42" rx="13" ry="7" transform="rotate(-31 585 42)"/><ellipse cx="740" cy="56" rx="15" ry="8" transform="rotate(22 740 56)"/>
-						</g>
-					</svg>
-				</div>
-
-				<div class="menu-topline"><span class="soft-dot"></span><span>single-player · pastel · bots vivos</span></div>
-				<h1>Pint.io</h1>
-				<p class="subtitle">
-					Escolha um preset limpo ou abra o modo personalizado para ligar/desligar as mecânicas antes de entrar na sala. A base com bots de personalidade, carinhas, humor e mini-missões fica sempre ativa.
-				</p>
-
-				<div class="mode-summary">
+			<div class="card play-card">
+				<div class="menu-compact-head">
 					<div>
-						<div class="mode-kicker">Modo selecionado</div>
-						<div id="selectedModeTitle" class="selected-mode-title">Clássico</div>
-						<div id="selectedModeDesc" class="selected-mode-desc">A experiência base: bots com personalidade, expressões, humor visual e mini-missões.</div>
-						<div id="selectedModeTags" class="mode-tags"></div>
+						<div class="menu-topline"><span class="soft-dot"></span><span>arena viva no fundo · entre quando quiser</span></div>
+						<h1>Pint.io</h1>
+						<p class="subtitle">Escolha seu blob, ajuste a sala e entre direto na partida que já está acontecendo.</p>
 					</div>
-					<button id="openModeDialogButton" class="select-mode-button" type="button">Escolher modo</button>
+					<div id="menuNotice" class="menu-notice">Seu blob já está protegido no mapa.</div>
 				</div>
 
-				<div class="grid">
-					<div class="box">
-						<label><span>Bots</span><strong id="botCountLabel">25</strong></label>
-						<input id="botCount" type="range" min="5" max="70" value="25" />
-						<label style="margin-top:16px"><span>Comidas</span><strong id="foodCountLabel">550</strong></label>
-						<input id="foodCount" type="range" min="120" max="1300" value="550" />
+				<div class="menu-panels">
+					<div class="menu-panel profile-panel">
+						<div class="panel-kicker">Jogador</div>
+						<div class="panel-title">Seu blob</div>
+						<div class="player-preview-row">
+							<div id="playerColorPreview" class="player-color-preview" aria-hidden="true"><span></span></div>
+							<div class="name-field">
+								<label for="playerNameInput">Nome</label>
+								<input id="playerNameInput" class="player-name-input" type="text" maxlength="16" value="Você" placeholder="Seu nome" autocomplete="off" />
+							</div>
+						</div>
+						<div class="color-label">Cor</div>
+						<div id="playerColorPicker" class="color-grid" aria-label="Escolher cor do blob">
+							<button class="color-swatch active" type="button" data-color="#9fd6cf" style="--swatch:#9fd6cf" aria-label="Menta"></button>
+							<button class="color-swatch" type="button" data-color="#eaa6ad" style="--swatch:#eaa6ad" aria-label="Rosa"></button>
+							<button class="color-swatch" type="button" data-color="#f0c983" style="--swatch:#f0c983" aria-label="Dourado"></button>
+							<button class="color-swatch" type="button" data-color="#b8d8ba" style="--swatch:#b8d8ba" aria-label="Verde"></button>
+							<button class="color-swatch" type="button" data-color="#a9c8d8" style="--swatch:#a9c8d8" aria-label="Azul"></button>
+							<button class="color-swatch" type="button" data-color="#d8b7dd" style="--swatch:#d8b7dd" aria-label="Lilás"></button>
+							<button class="color-swatch" type="button" data-color="#f2b8a0" style="--swatch:#f2b8a0" aria-label="Pêssego"></button>
+							<button class="color-swatch" type="button" data-color="#e7d99f" style="--swatch:#e7d99f" aria-label="Areia"></button>
+						</div>
 					</div>
-					<div class="box">
-						<label><span>Stop motion / trepidação</span><input id="menuStopMotion" type="checkbox" checked /></label>
-						<label><span>FPS visual</span><strong id="visualFpsLabel">12</strong></label>
-						<input id="visualFps" type="range" min="6" max="30" value="12" />
-						<label style="margin-top:16px"><span>Força da trepidação</span><strong id="jitterLabel">1.6</strong></label>
-						<input id="jitterStrength" type="range" min="0" max="4" step="0.1" value="1.6" />
-						<label style="margin-top:16px"><span>Controles touch</span><input id="menuTouchControls" type="checkbox" /></label>
-						<div class="box-tip">Aparecem automaticamente no celular. No desktop você pode habilitar para testar a UI mobile.</div>
+
+					<div class="menu-panel play-panel">
+						<div class="panel-kicker">Entrar</div>
+						<button id="startButton" class="play-button" type="button">Jogar</button>
+						<div class="quick-actions">
+							<button id="demoButton" class="secondary" type="button">Calmo</button>
+							<button id="hardButton" class="ghost" type="button">Caótico</button>
+						</div>
+						<div class="play-hints">
+							<span>Espaço divide</span>
+							<span>W ejeta</span>
+							<span>Shift dash</span>
+						</div>
+					</div>
+
+					<div class="menu-panel mode-panel">
+						<div class="panel-kicker">Modo</div>
+						<div id="selectedModeHero" class="selected-mode-hero" aria-hidden="true"></div>
+						<div class="selected-mode-title" id="selectedModeTitle">Clássico</div>
+						<div class="selected-mode-desc" id="selectedModeDesc">A experiência base: bots com personalidade, expressões, humor visual e mini-missões.</div>
+						<div id="selectedModeTags" class="mode-tags compact-tags"></div>
+						<button id="openModeDialogButton" class="select-mode-button" type="button">Trocar modo</button>
 					</div>
 				</div>
 
-				<div class="actions">
-					<button id="startButton">Jogar</button>
-					<button id="demoButton" class="secondary">Modo calmo</button>
-					<button id="hardButton" class="ghost">Caótico rápido</button>
+				<div class="menu-panel room-panel">
+					<div class="room-head">
+						<div><div class="panel-kicker">Sala</div><div class="room-title">Ajustes rápidos</div></div>
+						<div class="room-pill">mundo continua rodando</div>
+					</div>
+					<div class="room-grid">
+						<label class="range-control"><span>Bots <strong id="botCountLabel">25</strong></span><input id="botCount" type="range" min="5" max="70" value="25" /></label>
+						<label class="range-control"><span>Comidas <strong id="foodCountLabel">550</strong></span><input id="foodCount" type="range" min="120" max="1300" value="550" /></label>
+						<label class="range-control"><span>FPS visual <strong id="visualFpsLabel">12</strong></span><input id="visualFps" type="range" min="6" max="30" value="12" /></label>
+						<label class="range-control"><span>Trepidação <strong id="jitterLabel">1.6</strong></span><input id="jitterStrength" type="range" min="0" max="4" step="0.1" value="1.6" /></label>
+						<label class="check-control"><span>Stop motion</span><input id="menuStopMotion" type="checkbox" checked /></label>
+						<label class="check-control"><span>Controles touch</span><input id="menuTouchControls" type="checkbox" /></label>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -310,42 +430,119 @@
 						<h2 id="modeDialogTitle" class="dialog-title">Escolher modo</h2>
 						<p class="dialog-subtitle">Presets são atalhos. O Personalizado é onde você mistura mecânicas sem criar um monte de opções tipo “1 + 2 + 3”.</p>
 					</div>
-					<button id="closeModeDialogButton" class="close-button" type="button">Fechar</button>
+					<div class="dialog-actions-top">
+						<button id="closeModeDialogButton" class="close-button" type="button">Fechar</button>
+						<button id="applyModeDialogButton" class="apply-mode-button" type="button">Usar este modo</button>
+					</div>
 				</div>
 
 				<div class="mode-picker-layout">
 					<div class="mode-option-list" id="modeOptionList">
 						<button class="mode-option active" type="button" data-mode="classic">
-							<span class="option-icon">○</span>
-							<span><span class="option-title">Clássico</span><span class="option-desc">Partida limpa com a base fixa: bots, carinhas, humor e missões.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#e9efd1"/>
+									<circle cx="80" cy="60" r="24" fill="#9fd6cf"/>
+									<circle cx="52" cy="76" r="10" fill="#efb1bf"/><circle cx="108" cy="76" r="10" fill="#f1cb83"/>
+									<circle cx="34" cy="30" r="5" fill="#e8a7ae"/><circle cx="63" cy="24" r="4" fill="#f0d68c"/><circle cx="118" cy="26" r="5" fill="#a9c8d8"/><circle cx="130" cy="40" r="4" fill="#dfc89f"/>
+									<circle cx="73" cy="56" r="3.1" fill="#4d4a45"/><circle cx="87" cy="56" r="3.1" fill="#4d4a45"/>
+									<path d="M71 66 C 76 72, 84 72, 89 66" fill="none" stroke="#4d4a45" stroke-width="2.8" stroke-linecap="round"/>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Base</span><span class="option-title">Clássico</span><span class="option-desc">Bots, missões e humor.</span></span>
 						</button>
 						<button class="mode-option" type="button" data-mode="special">
-							<span class="option-icon">✦</span>
-							<span><span class="option-title">Gotas Especiais</span><span class="option-desc">Modo 1. Gotas raras mudam o ritmo com buffs, cura e tinta preta.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#f2e8c7"/>
+									<circle cx="80" cy="60" r="22" fill="#9fd6cf"/>
+									<circle cx="50" cy="38" r="12" fill="#f0c983"/><circle cx="118" cy="35" r="10" fill="#a9c8d8"/><circle cx="128" cy="76" r="9" fill="#d8b7dd"/><circle cx="42" cy="84" r="8" fill="#b8d8ba"/>
+									<circle cx="73" cy="58" r="3" fill="#4d4a45"/><circle cx="87" cy="58" r="3" fill="#4d4a45"/>
+									<path d="M72 68 C 77 73, 83 73, 88 68" fill="none" stroke="#4d4a45" stroke-width="2.8" stroke-linecap="round"/>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Modo 1</span><span class="option-title">Gotas Especiais</span><span class="option-desc">Buffs, cura e tinta preta.</span></span>
 						</button>
 						<button class="mode-option" type="button" data-mode="vines">
-							<span class="option-icon">☘</span>
-							<span><span class="option-title">Trepadeiras BR</span><span class="option-desc">Modo 2. Battle royale pastel com zona segura fechando.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#d7e1bf"/>
+									<circle cx="80" cy="60" r="34" fill="none" stroke="#7db081" stroke-width="10" stroke-dasharray="120 20"/>
+									<circle cx="80" cy="60" r="17" fill="#efb1bf"/>
+									<path d="M34 84 C 44 74, 46 58, 56 52" fill="none" stroke="#8dae78" stroke-width="6" stroke-linecap="round"/>
+									<path d="M126 36 C 114 46, 114 62, 105 68" fill="none" stroke="#8dae78" stroke-width="6" stroke-linecap="round"/>
+									<circle cx="74" cy="58" r="2.6" fill="#4d4a45"/><circle cx="86" cy="58" r="2.6" fill="#4d4a45"/>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Modo 2</span><span class="option-title">Trepadeiras BR</span><span class="option-desc">Zona segura fecha.</span></span>
 						</button>
 						<button class="mode-option" type="button" data-mode="trails">
-							<span class="option-icon">≈</span>
-							<span><span class="option-title">Rastros de Tinta</span><span class="option-desc">Modo 3. Blobs pintam o chão e ganham ritmo sobre a própria tinta.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#f2e8cf"/>
+									<path d="M0 32 C 28 18, 48 44, 76 30 S 126 21, 160 33" fill="none" stroke="#e6c88b" stroke-width="8" stroke-linecap="round"/>
+									<path d="M0 54 C 26 44, 46 64, 76 53 S 128 43, 160 55" fill="none" stroke="#a9d0c8" stroke-width="8" stroke-linecap="round"/>
+									<path d="M0 77 C 26 67, 44 88, 76 76 S 126 66, 160 77" fill="none" stroke="#efc9cf" stroke-width="8" stroke-linecap="round"/>
+									<circle cx="122" cy="63" r="16" fill="#9fd6cf"/>
+									<circle cx="117" cy="60" r="2.5" fill="#4d4a45"/><circle cx="127" cy="60" r="2.5" fill="#4d4a45"/>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Modo 3</span><span class="option-title">Rastros de Tinta</span><span class="option-desc">Tinta própria dá boost.</span></span>
 						</button>
 						<button class="mode-option" type="button" data-mode="events">
-							<span class="option-icon">✺</span>
-							<span><span class="option-title">Eventos Vivos</span><span class="option-desc">Modo 4. Chuva de tinta, vento, florada, chá e manchas mudam a partida.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#e9ecda"/>
+									<path d="M28 24 L34 40 L24 40 Z" fill="#b7cfe6"/><path d="M56 20 L62 38 L50 38 Z" fill="#b7cfe6"/><path d="M92 24 L98 42 L86 42 Z" fill="#b7cfe6"/>
+									<circle cx="44" cy="78" r="5" fill="#efb1bf"/><circle cx="62" cy="86" r="4" fill="#f0c983"/><circle cx="102" cy="80" r="5" fill="#b8d8ba"/><circle cx="118" cy="92" r="4" fill="#d8b7dd"/>
+									<circle cx="80" cy="58" r="22" fill="#9fd6cf"/>
+									<circle cx="74" cy="56" r="2.8" fill="#4d4a45"/><circle cx="86" cy="56" r="2.8" fill="#4d4a45"/>
+									<path d="M72 66 C 76 71, 84 71, 88 66" fill="none" stroke="#4d4a45" stroke-width="2.8" stroke-linecap="round"/>
+									<path d="M120 22 C 130 20, 138 24, 144 30" fill="none" stroke="#d9cda7" stroke-width="4" stroke-linecap="round"/>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Modo 4</span><span class="option-title">Eventos Vivos</span><span class="option-desc">Chuva, vento e florada.</span></span>
 						</button>
 						<button class="mode-option" type="button" data-mode="powerups">
-							<span class="option-icon">✧</span>
-							<span><span class="option-title">Power-ups de Pintura</span><span class="option-desc">Modo 5. Pincelada, carimbo, solvente, cola e aquarela mudam as jogadas.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#efe4ce"/>
+									<circle cx="80" cy="60" r="22" fill="#9fd6cf"/>
+									<path d="M28 58 H50" stroke="#8ec6e5" stroke-width="8" stroke-linecap="round"/><path d="M42 48 L52 58 L42 68" fill="none" stroke="#8ec6e5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+									<path d="M116 42 L126 32 L136 42 L126 52 Z" fill="#d6b8df"/>
+									<circle cx="48" cy="88" r="7" fill="#e9b0a8"/><circle cx="126" cy="82" r="7" fill="#f0d38a"/>
+									<circle cx="74" cy="58" r="2.8" fill="#4d4a45"/><circle cx="86" cy="58" r="2.8" fill="#4d4a45"/>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Modo 5</span><span class="option-title">Power-ups</span><span class="option-desc">Pincel, carimbo e cola.</span></span>
 						</button>
 						<button class="mode-option" type="button" data-mode="zones">
-							<span class="option-icon">◍</span>
-							<span><span class="option-title">Zonas do Mapa</span><span class="option-desc">Modo 6. Jardim, lago de tinta, bosque, mesa do pintor e mancha seca.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#efe2c8"/>
+									<circle cx="53" cy="52" r="24" fill="#c9ddb0" opacity=".95"/>
+									<circle cx="108" cy="48" r="22" fill="#d7d3bf" opacity=".95"/>
+									<circle cx="83" cy="82" r="26" fill="#ead08e" opacity=".95"/>
+									<text x="53" y="56" text-anchor="middle" font-size="10" font-family="Segoe UI, sans-serif" fill="#5a5a48">Jardim</text>
+									<text x="108" y="52" text-anchor="middle" font-size="10" font-family="Segoe UI, sans-serif" fill="#5a5a48">Lago</text>
+									<text x="83" y="86" text-anchor="middle" font-size="10" font-family="Segoe UI, sans-serif" fill="#5a5a48">Mesa</text>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Modo 6</span><span class="option-title">Zonas do Mapa</span><span class="option-desc">Jardim, lago e bosque.</span></span>
 						</button>
 						<button class="mode-option" type="button" data-mode="custom">
-							<span class="option-icon">⚙</span>
-							<span><span class="option-title">Personalizado</span><span class="option-desc">Monte a sala ativando ou desligando as mecânicas disponíveis.</span></span>
+							<span class="mode-card-illustration">
+								<svg viewBox="0 0 160 120" aria-hidden="true">
+									<rect width="160" height="120" rx="18" fill="#efe7d0"/>
+									<circle cx="78" cy="60" r="22" fill="none" stroke="#9fb49e" stroke-width="10" stroke-dasharray="14 10"/>
+									<circle cx="78" cy="60" r="14" fill="#d8ccb7"/>
+									<rect x="28" y="34" width="26" height="14" rx="7" fill="#ded7c6"/><circle cx="45" cy="41" r="5" fill="#8db58f"/>
+									<rect x="28" y="74" width="26" height="14" rx="7" fill="#ded7c6"/><circle cx="37" cy="81" r="5" fill="#b7c0ac"/>
+									<rect x="106" y="34" width="26" height="14" rx="7" fill="#ded7c6"/><circle cx="123" cy="41" r="5" fill="#8db58f"/>
+									<rect x="106" y="74" width="26" height="14" rx="7" fill="#ded7c6"/><circle cx="115" cy="81" r="5" fill="#8db58f"/>
+								</svg>
+							</span>
+							<span class="mode-option-body"><span class="mode-option-topline">Livre</span><span class="option-title">Personalizado</span><span class="option-desc">Monte sua sala.</span></span>
 						</button>
 					</div>
 
@@ -387,21 +584,9 @@
 					</div>
 				</div>
 
-				<div class="dialog-actions">
-					<button id="cancelModeDialogButton" class="ghost" type="button">Cancelar</button>
-					<button id="applyModeDialogButton" type="button">Usar este modo</button>
-				</div>
 			</div>
 		</div>
 
-		<section id="gameOverMenu" class="overlay">
-			<div class="card">
-				<div class="vine" aria-hidden="true"><svg viewBox="0 0 900 80" preserveAspectRatio="none"><path d="M-20 35 C 90 4, 140 68, 260 32 S 450 12, 560 35 S 760 70, 930 25" fill="none" stroke="rgba(101,139,91,.62)" stroke-width="5" stroke-linecap="round"/></svg></div>
-				<h1>Virou tinta.</h1>
-				<p id="gameOverText" class="subtitle">Sua célula foi absorvida.</p>
-				<div class="actions"><button id="restartButton">Jogar de novo</button><button id="backToMenuButton" class="secondary">Voltar ao menu</button></div>
-			</div>
-		</section>
 
 		<div id="hud" class="hud">
 			<div class="hud-card stats"><div class="big" id="massText">Massa 0</div><div class="small" id="rankText">posição #1</div></div>
@@ -447,7 +632,6 @@
 		const openModeDialogButton = document.getElementById("openModeDialogButton");
 		const modeDialog = document.getElementById("modeDialog");
 		const closeModeDialogButton = document.getElementById("closeModeDialogButton");
-		const cancelModeDialogButton = document.getElementById("cancelModeDialogButton");
 		const applyModeDialogButton = document.getElementById("applyModeDialogButton");
 		const customSpecialToggle = document.getElementById("customSpecialToggle");
 		const customVinesToggle = document.getElementById("customVinesToggle");
@@ -455,6 +639,7 @@
 		const customEventsToggle = document.getElementById("customEventsToggle");
 		const customPowerupsToggle = document.getElementById("customPowerupsToggle");
 		const customZonesToggle = document.getElementById("customZonesToggle");
+		const selectedModeHero = document.getElementById("selectedModeHero");
 		const selectedModeTitle = document.getElementById("selectedModeTitle");
 		const selectedModeDesc = document.getElementById("selectedModeDesc");
 		const selectedModeTags = document.getElementById("selectedModeTags");
@@ -463,6 +648,10 @@
 		const restartButton = document.getElementById("restartButton");
 		const backToMenuButton = document.getElementById("backToMenuButton");
 		const pauseButton = document.getElementById("pauseButton");
+		const playerNameInput = document.getElementById("playerNameInput");
+		const playerColorPreview = document.getElementById("playerColorPreview");
+		const playerColorButtons = Array.from(document.querySelectorAll(".color-swatch"));
+		const menuNotice = document.getElementById("menuNotice");
 
 		const botCountInput = document.getElementById("botCount");
 		const foodCountInput = document.getElementById("foodCount");
@@ -599,6 +788,7 @@
 			jitterStrength: 1.6,
 			cameraSmooth: 7.5,
 			playerName: "Você",
+			playerColor: "#9fd6cf",
 			touchControls: isTouchDevice,
 			mode: "classic",
 			custom: {
@@ -636,6 +826,7 @@
 			bgPattern: null,
 			mission: null,
 			stats: null,
+			arenaSignature: "",
 			vines: { centerX: 2600, centerY: 2600, startRadius: 2450, currentRadius: 2450, finalRadius: 760, shrinkDelay: 12, shrinkDuration: 270, pulse: 0 },
 			trails: [],
 			viruses: [],
@@ -648,7 +839,8 @@
 			actions: { lastSplitAt: -99, lastEjectAt: -99, lastDashAt: -99 },
 			touch: { active: false, pointerId: null, dx: 0, dy: 0, normX: 0, normY: 0, maxDistance: 42 },
 			input: { screenX: innerWidth / 2, screenY: innerHeight / 2, worldX: 0, worldY: 0, hasPointer: false },
-			camera: { x: 2600, y: 2600, zoom: .8 }
+			camera: { x: 2600, y: 2600, zoom: .8 },
+			ambientCamera: { x: 2600, y: 2600, nextAt: 0 }
 		};
 
 		function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -676,6 +868,9 @@
 			return modeInfo[mode] || modeInfo.classic;
 		}
 
+		function isWorldReady() { return state.cells.length > 0 || state.foods.length > 0 || state.viruses.length > 0; }
+		function isPlayerControlActive() { return state.mode === "playing" && !state.paused; }
+		function isPlayerProtected() { return state.mode !== "playing"; }
 		function isPlayerCell(cell) { return cell && cell.alive && cell.type === "player"; }
 		function getPlayerCells() { return state.cells.filter(isPlayerCell); }
 		function getPlayerTotalMass() { return getPlayerCells().reduce((sum, c) => sum + c.mass, 0); }
@@ -702,7 +897,7 @@
 				this.teamId = type === "player" ? "player" : `cell:${this.id}`;
 				this.mergeUnlockAt = 0;
 				this.nextTrailAt = 0;
-				this.visual = { x, y, radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+				this.visual = { x, y, radius, jx: 0, jy: 0, squash: 1, pulse: 0, outlineSeed: this.seed, outlineWobble: .032, outlineRoughness: 1, outlineFrame: 0, softMoveX: 1, softMoveY: 0, softMoveAmt: 0, softPressX: 0, softPressY: 0, softPressAmt: 0 };
 			}
 			refreshRadius() { this.radius = Math.sqrt(this.mass); }
 			addMass(amount) { this.mass = Math.max(180, this.mass + amount); this.refreshRadius(); }
@@ -733,10 +928,10 @@
 				if (this.y > max - cushion) pushY -= (this.y - (max - cushion)) / cushion;
 				this.vx += pushX * 18;
 				this.vy += pushY * 18;
-				if (this.x < min) { this.x = min; this.vx = Math.max(this.vx, 40); }
-				else if (this.x > max) { this.x = max; this.vx = Math.min(this.vx, -40); }
-				if (this.y < min) { this.y = min; this.vy = Math.max(this.vy, 40); }
-				else if (this.y > max) { this.y = max; this.vy = Math.min(this.vy, -40); }
+				if (this.x < min) { this.x = min; this.vx = Math.max(this.vx, 40); nudgeSoftBody(this, -1, 0, .75); }
+				else if (this.x > max) { this.x = max; this.vx = Math.min(this.vx, -40); nudgeSoftBody(this, 1, 0, .75); }
+				if (this.y < min) { this.y = min; this.vy = Math.max(this.vy, 40); nudgeSoftBody(this, 0, -1, .75); }
+				else if (this.y > max) { this.y = max; this.vy = Math.min(this.vy, -40); nudgeSoftBody(this, 0, 1, .75); }
 			}
 		}
 
@@ -755,7 +950,7 @@
 				}
 				this.seed = Math.random() * 10000; this.alive = true;
 				this.vx = 0; this.vy = 0; this.isEjected = false; this.ejectedBy = null; this.pickupDelayUntil = 0; this.life = Infinity;
-				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0, outlineSeed: this.seed, outlineWobble: .022, outlineRoughness: .85, outlineFrame: 0 };
 			}
 		}
 
@@ -765,7 +960,7 @@
 				this.id = state.idSeq++;
 				this.x = x; this.y = y; this.radius = rand(38, 52); this.mass = this.radius * this.radius;
 				this.color = "#9fcf8a"; this.seed = Math.random() * 10000; this.alive = true; this.feed = 0;
-				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0, outlineSeed: this.seed, outlineWobble: .03, outlineRoughness: 1.08, outlineFrame: 0 };
 			}
 		}
 
@@ -776,7 +971,7 @@
 				const data = powerupTypes[this.type];
 				this.radius = rand(13, 17); this.color = data.color; this.icon = data.icon; this.label = data.label;
 				this.seed = Math.random() * 10000; this.alive = true; this.life = rand(24, 38);
-				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+				this.visual = { x, y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0, outlineSeed: this.seed, outlineWobble: .025, outlineRoughness: .95, outlineFrame: 0 };
 			}
 		}
 
@@ -789,7 +984,7 @@
 				this.vy = owner.vy * .35 + Math.sin(angleOffset) * 85;
 				this.radius = owner.radius * rand(.72, .9); this.color = owner.color; this.name = "carimbo";
 				this.seed = Math.random() * 10000; this.life = 7.5; this.maxLife = 7.5;
-				this.visual = { x: this.x, y: this.y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0 };
+				this.visual = { x: this.x, y: this.y, radius: this.radius, jx: 0, jy: 0, squash: 1, pulse: 0, outlineSeed: this.seed, outlineWobble: .03, outlineRoughness: 1.05, outlineFrame: 0 };
 			}
 		}
 
@@ -897,7 +1092,7 @@
 		}
 
 		function spawnPlayer() {
-			const player = new Cell({ x: config.arenaSize / 2 + rand(-120, 120), y: config.arenaSize / 2 + rand(-120, 120), radius: 26, color: "#9fd6cf", name: config.playerName, type: "player" });
+			const player = new Cell({ x: config.arenaSize / 2 + rand(-120, 120), y: config.arenaSize / 2 + rand(-120, 120), radius: 26, color: config.playerColor, name: config.playerName, type: "player" });
 			player.teamId = "player"; player.effects.spawnShieldUntil = state.time + coreRules.spawnShieldSeconds; state.player = player; state.cells.push(player);
 		}
 
@@ -979,6 +1174,8 @@
 			selectedModeTitle.textContent = info.title;
 			selectedModeDesc.textContent = info.desc;
 			selectedModeTags.innerHTML = modeTagsFor(info).map(tag => `<span class="tag ${tag.on ? "on" : "off"}">${tag.label}</span>`).join("");
+			const selectedOption = document.querySelector(`.mode-option[data-mode="${config.mode}"] .mode-card-illustration`);
+			if (selectedModeHero && selectedOption) selectedModeHero.innerHTML = selectedOption.innerHTML;
 		}
 
 		function refreshDialogModeDetails() {
@@ -1027,6 +1224,45 @@
 			config.custom = { ...config.draftCustom };
 			selectMode(config.draftMode || "classic");
 			closeModeDialog();
+			if (state.mode === "menu") { buildArena(true); showMainMenu(); }
+		}
+
+		function sanitizePlayerName(value) {
+			const name = String(value || "").trim().slice(0, 16);
+			return name || "Você";
+		}
+
+		function setMenuNotice(text, alert = false) {
+			if (!menuNotice) return;
+			menuNotice.textContent = text || "Seu blob já está protegido no mapa.";
+			menuNotice.classList.toggle("alert", !!alert);
+		}
+
+		function updateLivingPlayerProfile() {
+			for (const part of getPlayerCells()) {
+				part.name = config.playerName;
+				part.color = config.playerColor;
+			}
+		}
+
+		function refreshPlayerProfileUI() {
+			if (playerNameInput && document.activeElement !== playerNameInput) playerNameInput.value = config.playerName;
+			if (playerColorPreview) playerColorPreview.style.setProperty("--player-color", config.playerColor);
+			playerColorButtons.forEach(button => button.classList.toggle("active", button.dataset.color === config.playerColor));
+		}
+
+		function syncPlayerProfileFromMenu() {
+			config.playerName = sanitizePlayerName(playerNameInput ? playerNameInput.value : config.playerName);
+			if (playerNameInput && document.activeElement !== playerNameInput) playerNameInput.value = config.playerName;
+			updateLivingPlayerProfile();
+			refreshPlayerProfileUI();
+		}
+
+		function choosePlayerColor(color) {
+			if (!color) return;
+			config.playerColor = color;
+			updateLivingPlayerProfile();
+			refreshPlayerProfileUI();
 		}
 
 		function syncLabels() {
@@ -1035,6 +1271,7 @@
 			visualFpsLabel.textContent = visualFpsInput.value;
 			jitterLabel.textContent = Number(jitterStrengthInput.value).toFixed(1);
 			if (menuTouchControlsInput) menuTouchControlsInput.checked = config.touchControls;
+			refreshPlayerProfileUI();
 		}
 
 		
@@ -1110,8 +1347,36 @@
 			state.vines.pulse = 0;
 		}
 
-		function resetGame() {
-			state.mode = "playing"; state.paused = false; state.cells = []; state.foods = []; state.idSeq = 1;
+		function applyRuntimeConfigFromMenu() {
+			syncPlayerProfileFromMenu();
+			config.botTarget = Number(botCountInput.value);
+			config.foodTarget = Number(foodCountInput.value);
+			config.stopMotion = menuStopMotionInput.checked;
+			config.visualStepFps = Number(visualFpsInput.value);
+			config.jitterStrength = Number(jitterStrengthInput.value);
+			config.touchControls = menuTouchControlsInput.checked;
+			hudStopMotionInput.checked = config.stopMotion;
+		}
+
+		function currentArenaSignature() {
+			return JSON.stringify({
+				mode: config.mode,
+				custom: config.custom,
+				bots: Number(botCountInput.value),
+				foods: Number(foodCountInput.value)
+			});
+		}
+
+		function clearPlayerCells() {
+			for (const cell of state.cells) if (cell.type === "player") cell.alive = false;
+			state.cells = state.cells.filter(c => c.alive);
+			state.player = null;
+		}
+
+		function buildArena(spawnProtectedPlayer = true) {
+			applyRuntimeConfigFromMenu();
+			state.arenaSignature = currentArenaSignature();
+			state.cells = []; state.foods = []; state.idSeq = 1;
 			state.trails = [];
 			state.viruses = [];
 			state.powerups = [];
@@ -1123,24 +1388,97 @@
 			state.eventState = { active: null, nextAt: 18, until: 0, pulse: 0, windX: 0, windY: 0, spots: [], lastBurstAt: 0 };
 			state.runTime = 0; state.nextVisualTick = 0; state.nextHudTick = 0; state.nextBotRespawnTick = 0;
 			state.stats = makeStats(); resetVines();
-			config.botTarget = Number(botCountInput.value); config.foodTarget = Number(foodCountInput.value);
-			config.stopMotion = menuStopMotionInput.checked; config.visualStepFps = Number(visualFpsInput.value); config.jitterStrength = Number(jitterStrengthInput.value);
-			config.touchControls = menuTouchControlsInput.checked;
-			hudStopMotionInput.checked = config.stopMotion;
+			if (spawnProtectedPlayer) spawnPlayer();
+			for (let i = 0; i < config.botTarget; i++) spawnBot();
+			spawnFood(config.foodTarget);
+			for (let i = 0; i < 22; i++) spawnVirus();
+			state.mission = state.player ? makeMission() : null;
+			const focus = getPlayerFocus();
+			state.camera.x = focus.x; state.camera.y = focus.y; state.camera.zoom = .88;
+			state.ambientCamera.x = focus.x; state.ambientCamera.y = focus.y; state.ambientCamera.nextAt = 0;
 			resetTouchJoystick();
 			updateTouchUIVisibility();
-			spawnPlayer(); for (let i = 0; i < config.botTarget; i++) spawnBot(); spawnFood(config.foodTarget); for (let i = 0; i < 22; i++) spawnVirus();
-			state.mission = makeMission(); state.camera.x = state.player.x; state.camera.y = state.player.y; state.camera.zoom = .88;
-			mainMenu.classList.remove("active"); gameOverMenu.classList.remove("active"); hud.classList.add("active"); updateHud(true);
 		}
 
-		function showMainMenu() { state.mode = "menu"; state.paused = false; resetTouchJoystick(); mainMenu.classList.add("active"); gameOverMenu.classList.remove("active"); hud.classList.remove("active"); updateTouchUIVisibility(); }
+		function ensureLivingMenuArena() {
+			if (!isWorldReady()) buildArena(true);
+			if (!getPlayerCells().length) {
+				spawnPlayer();
+				state.mission = makeMission();
+			}
+		}
+
+		function preparePlayerForControl() {
+			if (!isWorldReady()) buildArena(false);
+			if (!getPlayerCells().length) spawnPlayer();
+			for (const part of getPlayerCells()) {
+				part.effects.spawnShieldUntil = state.time + coreRules.spawnShieldSeconds;
+				part.effects.virusSafeUntil = Math.max(part.effects.virusSafeUntil, state.time + 1.2);
+				part.mergeUnlockAt = Math.max(part.mergeUnlockAt, state.time + 1.4);
+			}
+			state.player = getPlayerCells().sort((a, b) => b.mass - a.mass)[0] || null;
+			state.stats = makeStats();
+			state.mission = makeMission();
+			state.actions = { lastSplitAt: -99, lastEjectAt: -99, lastDashAt: -99 };
+			state.nextHudTick = 0;
+		}
+
+		function enterGameFromMenu() {
+			applyRuntimeConfigFromMenu();
+			if (!isWorldReady() || state.arenaSignature !== currentArenaSignature()) buildArena(true);
+			else ensureLivingMenuArena();
+			preparePlayerForControl();
+			state.mode = "playing"; state.paused = false;
+			mainMenu.classList.remove("active"); gameOverMenu?.classList.remove("active"); hud.classList.add("active");
+			updateTouchUIVisibility();
+			updateHud(true);
+		}
+
+		function startNewArenaAndPlay() {
+			state.mode = "playing"; state.paused = false;
+			buildArena(true);
+			preparePlayerForControl();
+			mainMenu.classList.remove("active"); gameOverMenu?.classList.remove("active"); hud.classList.add("active");
+			updateTouchUIVisibility();
+			updateHud(true);
+		}
+
+		function respawnPlayerInArena() {
+			if (!isWorldReady()) buildArena(false);
+			clearPlayerCells();
+			spawnPlayer();
+			preparePlayerForControl();
+			state.mode = "playing"; state.paused = false;
+			mainMenu.classList.remove("active"); gameOverMenu?.classList.remove("active"); hud.classList.add("active");
+			updateTouchUIVisibility();
+			updateHud(true);
+		}
+
+		function showMainMenu(message = "") {
+			if (message && typeof message !== "string") message = "";
+			state.mode = "menu"; state.paused = false;
+			syncPlayerProfileFromMenu();
+			ensureLivingMenuArena();
+			for (const part of getPlayerCells()) part.effects.spawnShieldUntil = Math.max(part.effects.spawnShieldUntil, state.time + 9999);
+			resetTouchJoystick();
+			mainMenu.classList.add("active");
+			gameOverMenu?.classList.remove("active");
+			hud.classList.remove("active");
+			setMenuNotice(message || "Seu blob já está protegido no mapa.", !!message);
+			updateTouchUIVisibility();
+		}
+
 		function showGameOver(killerName) {
-			if (state.mode === "gameover") return;
-			state.mode = "gameover"; resetTouchJoystick(); hud.classList.remove("active"); gameOverMenu.classList.add("active"); updateTouchUIVisibility();
-			const mass = state.player ? Math.round(state.player.mass / 10) : 0;
+			if (state.mode !== "playing") return;
+			const mass = getPlayerTotalMass() || (state.player ? state.player.mass : 0);
 			const completed = state.stats ? state.stats.missionsCompleted : 0;
-			gameOverText.textContent = killerName ? `${killerName} absorveu você. Massa final: ${mass}. Missões completas: ${completed}.` : `Você desapareceu no mapa. Massa final: ${mass}. Missões completas: ${completed}.`;
+			clearPlayerCells();
+			state.stats = makeStats();
+			state.mission = null;
+			const message = killerName
+				? `${killerName} absorveu você · massa ${Math.round(mass / 10)} · missões ${completed}`
+				: `Você virou tinta · massa ${Math.round(mass / 10)} · missões ${completed}`;
+			showMainMenu(message);
 		}
 
 		function screenToWorld(x, y) { return { x: state.camera.x + (x - innerWidth / 2) / state.camera.zoom, y: state.camera.y + (y - innerHeight / 2) / state.camera.zoom }; }
@@ -1172,6 +1510,10 @@
 				const d = Math.hypot(dx, dy);
 				const limit = v.currentRadius - cell.radius * .15;
 				if (d > limit) {
+					if (cell.type === "player" && isPlayerProtected()) {
+						cell.effects.spawnShieldUntil = Math.max(cell.effects.spawnShieldUntil, state.time + 2);
+						continue;
+					}
 					const dir = d > .001 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 };
 					const outside = d - limit;
 					const damage = (18 + outside * .05) * dt;
@@ -1407,6 +1749,7 @@
 				if (p.life <= 0 || !p.alive) { state.powerups.splice(i, 1); continue; }
 				for (const cell of state.cells) {
 					if (!cell.alive) continue;
+					if (cell.type === "player" && isPlayerProtected()) continue;
 					const reach = cell.radius + p.radius * .8;
 					if (distSq(cell.x, cell.y, p.x, p.y) <= reach * reach) {
 						usePowerUp(cell, p);
@@ -1474,6 +1817,7 @@
 
 			for (const cell of state.cells) {
 				if (!cell.alive) continue;
+				if (cell.type === "player" && isPlayerProtected()) continue;
 				const z = zoneAt(cell.x, cell.y);
 				cell.currentZone = z ? z.key : null;
 				if (!z) continue;
@@ -1527,7 +1871,7 @@
 		}
 
 		function splitPlayer() {
-			if (state.mode !== "playing" || state.paused || state.time - state.actions.lastSplitAt < coreRules.splitCooldown) return;
+			if (!isPlayerControlActive() || state.time - state.actions.lastSplitAt < coreRules.splitCooldown) return;
 			updateInputWorld();
 			const focus = getPlayerFocus();
 			const dir = norm(state.input.worldX - focus.x, state.input.worldY - focus.y);
@@ -1542,7 +1886,7 @@
 		}
 
 		function ejectMass() {
-			if (state.mode !== "playing" || state.paused || state.time - state.actions.lastEjectAt < coreRules.ejectCooldown) return;
+			if (!isPlayerControlActive() || state.time - state.actions.lastEjectAt < coreRules.ejectCooldown) return;
 			updateInputWorld();
 			const part = getPlayerCells().sort((a, b) => b.mass - a.mass)[0];
 			if (!part || part.mass < coreRules.ejectCost + 260) return;
@@ -1552,11 +1896,12 @@
 			const sy = part.y + dir.y * (part.radius + 18);
 			spawnFoodPellet(sx, sy, coreRules.ejectCost * .72, "#d6f0c3", { x: dir.x * 520 + part.vx * .25, y: dir.y * 520 + part.vy * .25 }, part.teamId);
 			part.vx -= dir.x * 26; part.vy -= dir.y * 26;
+			nudgeSoftBody(part, dir.x, dir.y, .5);
 			state.actions.lastEjectAt = state.time; state.stats.ejected++;
 		}
 
 		function dashPlayer() {
-			if (state.mode !== "playing" || state.paused || state.time - state.actions.lastDashAt < coreRules.dashCooldown) return;
+			if (!isPlayerControlActive() || state.time - state.actions.lastDashAt < coreRules.dashCooldown) return;
 			updateInputWorld();
 			const focus = getPlayerFocus();
 			const dir = norm(state.input.worldX - focus.x, state.input.worldY - focus.y);
@@ -1565,6 +1910,7 @@
 				if (part.mass < coreRules.dashCost + 240) continue;
 				part.addMass(-coreRules.dashCost / Math.max(1, getPlayerCells().length));
 				part.vx += dir.x * 430; part.vy += dir.y * 430;
+				nudgeSoftBody(part, -dir.x, -dir.y, .72);
 				part.effects.dashUntil = Math.max(part.effects.dashUntil, state.time + .45);
 				dashed = true;
 			}
@@ -1657,6 +2003,7 @@
 			const huntRange = (280 + bot.radius * 4.8) * p.hunt * (teaTime ? .28 : 1);
 			for (const other of state.cells) {
 				if (!other.alive || other === bot) continue;
+				if (other.type === "player" && isPlayerProtected()) continue;
 				const d2 = distSq(bot.x, bot.y, other.x, other.y);
 				if (other.radius > bot.radius * 1.18 && d2 < fearRange * fearRange && d2 < threatD2) { threatD2 = d2; threat = other; }
 				if (bot.radius > other.radius * 1.25 && d2 < huntRange * huntRange && d2 < preyD2) { preyD2 = d2; prey = other; }
@@ -1777,6 +2124,7 @@
 				}
 				for (const cell of state.cells) {
 					if (!cell.alive || cell.effects.virusSafeUntil > state.time) continue;
+					if (cell.type === "player" && isPlayerProtected()) continue;
 					const reach = cell.radius + virus.radius * .62;
 					if (distSq(cell.x, cell.y, virus.x, virus.y) <= reach * reach) {
 						if (cell.radius > virus.radius * .9) explodeOnVirus(cell, virus);
@@ -1789,6 +2137,7 @@
 		function updateMassDecay(dt) {
 			for (const cell of state.cells) {
 				if (!cell.alive || cell.radius < coreRules.giantDecayRadius) continue;
+				if (cell.type === "player" && isPlayerProtected()) continue;
 				const excess = cell.radius - coreRules.giantDecayRadius;
 				cell.addMass(-excess * excess * .018 * dt);
 			}
@@ -1815,6 +2164,7 @@
 		function handleFoodEating() {
 			for (const cell of state.cells) {
 				if (!cell.alive) continue;
+				if (cell.type === "player" && isPlayerProtected()) continue;
 				for (let i = state.foods.length - 1; i >= 0; i--) {
 					const food = state.foods[i]; if (!food.alive) continue;
 					if (food.pickupDelayUntil > state.time && food.ejectedBy === cell.teamId) continue;
@@ -1832,6 +2182,7 @@
 		}
 
 		function canEat(eater, prey) {
+			if ((eater.type === "player" || prey.type === "player") && isPlayerProtected()) return false;
 			if (sameTeam(eater, prey)) return false;
 			if (prey.effects.spawnShieldUntil > state.time) return false;
 			const shielded = prey.effects.shieldUntil > state.time;
@@ -1845,10 +2196,21 @@
 			const centerLimit = eater.radius - prey.radius * (prey.effects.shieldUntil > state.time ? .04 : .18);
 			if (centerLimit <= 0) return false;
 			if (distSq(eater.x, eater.y, prey.x, prey.y) < centerLimit * centerLimit) {
+				const hitDir = norm(prey.x - eater.x, prey.y - eater.y);
+				nudgeSoftBody(eater, hitDir.x, hitDir.y, .65);
 				eater.addMass(prey.mass * .78); eater.lastAteAt = state.time; setMood(eater, "feliz", 1.15, .7);
 				splatterMass(prey.x, prey.y, prey.mass * .18, prey.color, clamp(Math.floor(prey.radius / 3), 8, 26));
 				prey.alive = false;
 				if (eater.type === "player" && prey.type === "bot") state.stats.botsEaten++;
+				if (prey.type === "player") {
+					const remainingPlayerParts = state.cells.filter(c => c !== prey && c.alive && c.type === "player");
+					if (remainingPlayerParts.length > 0) {
+						state.player = remainingPlayerParts.sort((a, b) => b.mass - a.mass)[0];
+						if (state.mode === "playing") showToast(`Parte absorvida · ${remainingPlayerParts.length} parte${remainingPlayerParts.length > 1 ? "s" : ""} restante${remainingPlayerParts.length > 1 ? "s" : ""}.`);
+					} else if (state.mode === "playing") {
+						showGameOver(eater.name || "um blob");
+					}
+				}
 				return true;
 			}
 			return false;
@@ -1858,6 +2220,13 @@
 			const alive = state.cells.filter(c => c.alive);
 			for (let i = 0; i < alive.length; i++) for (let j = i + 1; j < alive.length; j++) {
 				const a = alive[i]; const b = alive[j];
+				const d = norm(b.x - a.x, b.y - a.y);
+				const overlap = a.radius + b.radius - d.d;
+				if (overlap > 0) {
+					const amt = clamp(overlap / Math.max(18, Math.min(a.radius, b.radius)), 0, 1) * (sameTeam(a, b) ? 0.38 : 0.7);
+					nudgeSoftBody(a, d.x, d.y, amt);
+					nudgeSoftBody(b, -d.x, -d.y, amt);
+				}
 				if (a.radius > b.radius) tryEatCell(a, b); else tryEatCell(b, a);
 			}
 			state.cells = state.cells.filter(c => c.alive);
@@ -1871,9 +2240,25 @@
 		}
 
 		function updateCamera(dt) {
+			let tx = state.camera.x, ty = state.camera.y, targetZoom = .82;
 			const focus = getPlayerFocus();
-			const tx = focus.alive ? focus.x : state.camera.x; const ty = focus.alive ? focus.y : state.camera.y;
-			const targetZoom = clamp(1.05 - (focus.radius - 24) * .0044, .30, 1.05);
+			if (state.mode === "playing" && focus.alive) {
+				tx = focus.x; ty = focus.y;
+				targetZoom = clamp(1.05 - (focus.radius - 24) * .0044, .30, 1.05);
+			} else if (state.mode === "menu" && focus.alive) {
+				const drift = Math.sin(state.time * .22) * 120;
+				tx = focus.x + drift; ty = focus.y + Math.cos(state.time * .18) * 90;
+				targetZoom = clamp(.96 - (focus.radius - 24) * .0032, .46, .92);
+			} else {
+				if (state.time >= state.ambientCamera.nextAt) {
+					const candidates = state.cells.filter(c => c.alive && c.type !== "player").sort((a, b) => b.mass - a.mass);
+					const target = candidates.length ? pick(candidates.slice(0, Math.min(8, candidates.length))) : null;
+					state.ambientCamera.x = target ? target.x : rand(700, config.arenaSize - 700);
+					state.ambientCamera.y = target ? target.y : rand(700, config.arenaSize - 700);
+					state.ambientCamera.nextAt = state.time + rand(3.2, 6.2);
+				}
+				tx = state.ambientCamera.x; ty = state.ambientCamera.y; targetZoom = .74;
+			}
 			const t = 1 - Math.exp(-dt * config.cameraSmooth);
 			state.camera.x = lerp(state.camera.x, tx, t); state.camera.y = lerp(state.camera.y, ty, t); state.camera.zoom = lerp(state.camera.zoom, targetZoom, t * .85);
 		}
@@ -1889,22 +2274,94 @@
 			return extra;
 		}
 
+		function outlineProfileFor(entity) {
+			const baseRadius = entity.visual?.radius || entity.radius || 20;
+			const normalizedRadius = clamp(baseRadius, 12, 150);
+			let wobble = 0.018 + normalizedRadius * 0.00014;
+			let roughness = 0.92;
+			if (entity instanceof Cell) {
+				wobble += clamp((normalizedRadius - 18) * 0.00010, 0, 0.011);
+				roughness += entity.type === "player" ? -0.07 : 0.05;
+				if (entity.personality) roughness += entity.personality.jitter * 0.045;
+				if (entity.mood === "assustado" || entity.mood === "nervoso") wobble += 0.0055 * Math.max(.35, entity.moodStrength || 1);
+				if (entity.mood === "bobo") wobble += 0.0025;
+				if (entity.mood === "feliz" || entity.rewardUntil > state.time || state.time - entity.lastAteAt < .7) wobble += 0.0032;
+				if (entity.type === "player") wobble *= 0.84;
+			} else if (entity instanceof Virus) {
+				wobble = 0.03; roughness = 1.08;
+			} else if (entity.special) {
+				wobble = 0.024; roughness = 0.9;
+			}
+			return { wobble: clamp(wobble, 0.016, 0.042), roughness: clamp(roughness, 0.78, 1.24) };
+		}
+
+		function nudgeSoftBody(cell, dirX, dirY, amount = 1) {
+			if (!(cell instanceof Cell) || !cell.visual) return;
+			const d = norm(dirX, dirY);
+			const strength = clamp(amount, 0, 1.6);
+			cell.visual.softPressX = lerp(cell.visual.softPressX ?? d.x, d.x, 0.55);
+			cell.visual.softPressY = lerp(cell.visual.softPressY ?? d.y, d.y, 0.55);
+			cell.visual.softPressAmt = clamp((cell.visual.softPressAmt || 0) + strength * 0.18, 0, 0.22);
+		}
+
+		function updateSoftBodyVisuals(dt) {
+			for (const cell of state.cells) {
+				if (!cell.alive || !(cell instanceof Cell)) continue;
+				const v = cell.visual;
+				const motion = norm(cell.vx, cell.vy);
+				const speed = Math.hypot(cell.vx, cell.vy);
+				const speedRef = Math.max(90, speedForRadius(cell.radius) * 1.9);
+				const targetMoveAmt = clamp((speed / speedRef) * 0.085, 0, cell.type === "player" ? 0.08 : 0.1);
+				if (motion.d > 0.001) {
+					v.softMoveX = lerp(v.softMoveX ?? motion.x, motion.x, 1 - Math.exp(-dt * 10));
+					v.softMoveY = lerp(v.softMoveY ?? motion.y, motion.y, 1 - Math.exp(-dt * 10));
+				}
+				v.softMoveAmt = lerp(v.softMoveAmt || 0, targetMoveAmt, 1 - Math.exp(-dt * 8));
+				v.softPressAmt = lerp(v.softPressAmt || 0, 0, 1 - Math.exp(-dt * 7.5));
+				v.softPressX = lerp(v.softPressX ?? 0, 0, 1 - Math.exp(-dt * 6.5));
+				v.softPressY = lerp(v.softPressY ?? 0, 0, 1 - Math.exp(-dt * 6.5));
+				if (cell.effects.dashUntil > state.time) v.softMoveAmt = Math.min(Math.max(v.softMoveAmt, 0.09), 0.12);
+				if (state.time - cell.lastAteAt < 0.28) v.softPressAmt = Math.min(Math.max(v.softPressAmt, 0.045), 0.12);
+			}
+		}
+
 		function updateVisualSnapshots(now) {
 			const all = [...state.foods, ...state.viruses, ...state.powerups, ...state.decoys, ...state.cells];
+			const frameIndex = Math.floor(now * Math.max(1, config.visualStepFps));
+
+			// Posição, raio e escala real acompanham a simulação em tempo real.
+			// O stop-motion fica só nas animações: tremidinha, squash, pulso e silhueta redesenhada.
+			for (const e of all) {
+				e.visual.x = e.x;
+				e.visual.y = e.y;
+				e.visual.radius = e.radius;
+			}
+
 			if (!config.stopMotion) {
-				for (const e of all) { e.visual.x = e.x; e.visual.y = e.y; e.visual.radius = e.radius; e.visual.jx = 0; e.visual.jy = 0; e.visual.squash = 1; e.visual.pulse = Math.max(0, e.visual.pulse - .1); }
+				for (const e of all) {
+					e.visual.jx = 0; e.visual.jy = 0; e.visual.squash = 1; e.visual.pulse = Math.max(0, e.visual.pulse - .1);
+					const outline = outlineProfileFor(e);
+					e.visual.outlineSeed = e.seed; e.visual.outlineWobble = outline.wobble; e.visual.outlineRoughness = outline.roughness; e.visual.outlineFrame = frameIndex;
+				}
 				return;
 			}
+
 			if (now < state.nextVisualTick) return;
 			state.nextVisualTick = now + 1 / config.visualStepFps;
 			for (const e of all) {
 				const n1 = hashNoise(e.seed + now * 19.17); const n2 = hashNoise(e.seed + now * 31.71); const n3 = hashNoise(e.seed + now * 7.91);
 				const extra = e instanceof Cell ? moodJitterFor(e) : (e.special ? 1.5 : 0);
-				e.visual.x = e.x; e.visual.y = e.y; e.visual.radius = e.radius;
 				e.visual.jx = (n1 - .5) * (config.jitterStrength + extra); e.visual.jy = (n2 - .5) * (config.jitterStrength + extra);
 				let squash = 1 + (n3 - .5) * .022;
 				if (e instanceof Cell) { if (e.mood === "assustado") squash += Math.sin(now * 18 + e.seed) * .018; if (e.mood === "feliz") squash += .028; if (e.mood === "caçando") squash -= .018; }
 				e.visual.squash = squash; e.visual.pulse = e instanceof Cell && state.time - e.lastAteAt < .35 ? 1 : 0;
+				const outline = outlineProfileFor(e);
+				const shapeNoiseA = hashNoise(e.seed * 0.73 + frameIndex * 0.611 + 1.7);
+				const shapeNoiseB = hashNoise(e.seed * 1.11 + frameIndex * 0.377 + 4.1);
+				e.visual.outlineSeed = e.seed + frameIndex * 0.91 + shapeNoiseA * 9.0 + shapeNoiseB * 5.0;
+				e.visual.outlineWobble = clamp(outline.wobble + (shapeNoiseA - .5) * 0.008, 0.014, 0.05);
+				e.visual.outlineRoughness = clamp(outline.roughness + (shapeNoiseB - .5) * 0.16, 0.72, 1.28);
+				e.visual.outlineFrame = frameIndex;
 			}
 		}
 
@@ -1913,7 +2370,7 @@
 			const now = performance.now() / 1000; if (!force && now < state.nextHudTick) return; state.nextHudTick = now + .16;
 			const playerMass = getPlayerTotalMass();
 			const playerParts = getPlayerCells().length;
-			const sorted = [{ name: "Você", type: "player", mass: playerMass, personality: null, alive: playerMass > 0 }, ...state.cells.filter(c => c.alive && c.type !== "player")].sort((a, b) => b.mass - a.mass);
+			const sorted = [{ name: config.playerName, type: "player", mass: playerMass, personality: null, alive: playerMass > 0 }, ...state.cells.filter(c => c.alive && c.type !== "player")].sort((a, b) => b.mass - a.mass);
 			const rank = 1 + state.cells.filter(c => c.alive && c.type !== "player" && c.mass > playerMass).length; const mass = Math.round(playerMass / 10);
 			massText.textContent = `Massa ${mass}`;
 			rankText.textContent = playerMass > 0 ? `posição #${rank || "-"} · partes ${playerParts} · missões ${state.stats.missionsCompleted}` : "absorvido";
@@ -1950,9 +2407,22 @@
 		}
 
 		function update(dt, now) {
-			if (state.mode !== "playing" || state.paused) { updateVisualSnapshots(now); updateToast(); return; }
+			if (!isWorldReady()) { updateVisualSnapshots(now); updateToast(); return; }
+			if (state.paused && state.mode === "playing") { updateVisualSnapshots(now); updateToast(); return; }
 			state.runTime += dt;
-			updateEvents(dt); updateZones(dt); updatePlayer(dt); updateBots(dt, now); updateVines(dt); updateTrails(dt); updatePowerups(dt); updateDecoys(dt); updateEjectedFood(dt); updateViruses(dt); handleFoodEating(); handleCellEating(); mergePlayerParts(); updateMassDecay(dt); updateRankStats(); updateMission(dt); updateCamera(dt); updateVisualSnapshots(now); updateHud(false); updateToast();
+			updateEvents(dt); updateZones(dt);
+			if (state.mode === "playing") updatePlayer(dt);
+			else {
+				for (const part of getPlayerCells()) {
+					part.vx *= Math.exp(-dt * 4); part.vy *= Math.exp(-dt * 4);
+					part.x += part.vx * dt; part.y += part.vy * dt; part.keepInsideArena();
+				}
+			}
+			updateBots(dt, now); updateVines(dt); updateTrails(dt); updatePowerups(dt); updateDecoys(dt); updateEjectedFood(dt); updateViruses(dt); handleFoodEating(); handleCellEating();
+			if (state.mode === "playing") mergePlayerParts();
+			updateMassDecay(dt); updateRankStats(); updateSoftBodyVisuals(dt);
+			if (state.mode === "playing") { updateMission(dt); updateHud(false); }
+			updateCamera(dt); updateVisualSnapshots(now); updateToast();
 		}
 
 		function isVisible(x, y, radius) {
@@ -1961,12 +2431,31 @@
 			return x > state.camera.x - halfW && x < state.camera.x + halfW && y > state.camera.y - halfH && y < state.camera.y + halfH;
 		}
 
-		function drawBlobPath(x, y, r, seed, wobble = .035) {
+		function drawBlobPath(x, y, r, seed, wobble = .035, roughness = 1, deform = null) {
 			const steps = 34; ctx.beginPath();
 			for (let i = 0; i <= steps; i++) {
 				const a = (i / steps) * TAU;
-				const wave = Math.sin(a * 3 + seed) * wobble + Math.sin(a * 7 + seed * .71) * wobble * .55 + Math.sin(a * 11 + seed * 1.37) * wobble * .3;
-				const rr = r * (1 + wave); const px = x + Math.cos(a) * rr; const py = y + Math.sin(a) * rr;
+				const nx = Math.cos(a), ny = Math.sin(a);
+				const wave =
+					Math.sin(a * 3 + seed) * wobble +
+					Math.sin(a * (7 + roughness * .45) + seed * .71) * wobble * (0.55 + roughness * 0.07) +
+					Math.sin(a * (11 + roughness * .8) + seed * 1.37) * wobble * (0.3 + roughness * 0.05) +
+					Math.sin(a * (15 + roughness * 1.35) + seed * 1.91) * wobble * 0.12 * roughness;
+				let rr = r * (1 + wave);
+				if (deform) {
+					if (deform.moveAmt > 0.0001) {
+						const alongMove = nx * deform.moveX + ny * deform.moveY;
+						rr *= 1 + Math.abs(alongMove) * deform.moveAmt - (1 - Math.abs(alongMove)) * deform.moveAmt * 0.42;
+					}
+					if (deform.pressAmt > 0.0001) {
+						const alongPress = nx * deform.pressX + ny * deform.pressY;
+						const compress = Math.max(0, alongPress) * deform.pressAmt;
+						const bulge = Math.max(0, -alongPress) * deform.pressAmt * 0.7;
+						rr *= 1 - compress + bulge;
+					}
+				}
+				rr = Math.max(r * 0.72, rr);
+				const px = x + nx * rr; const py = y + ny * rr;
 				if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
 			}
 			ctx.closePath();
@@ -2016,19 +2505,28 @@
 
 		function drawBlob(c) {
 			const v = c.visual, x = v.x + v.jx, y = v.y + v.jy, r = v.radius, pulse = v.pulse ? r * .045 : 0;
+			const outlineSeed = v.outlineSeed ?? c.seed;
+			const outlineWobble = v.outlineWobble ?? .04;
+			const outlineRoughness = v.outlineRoughness ?? 1;
+			const deform = {
+				moveX: v.softMoveX ?? 1, moveY: v.softMoveY ?? 0, moveAmt: v.softMoveAmt ?? 0,
+				pressX: v.softPressX ?? 0, pressY: v.softPressY ?? 0, pressAmt: v.softPressAmt ?? 0
+			};
 			if (!isVisible(x, y, r)) return;
 			ctx.save(); ctx.translate(x, y); ctx.scale(v.squash || 1, 1 / (v.squash || 1)); ctx.translate(-x, -y);
 			ctx.beginPath(); ctx.ellipse(x + r * .08, y + r * .16, r * .9, r * .34, 0, 0, TAU); ctx.fillStyle = "rgba(80,55,35,.13)"; ctx.fill();
 			if (c.rewardUntil > state.time || c.effects.spawnShieldUntil > state.time || c.effects.shieldUntil > state.time || c.effects.speedUntil > state.time || c.effects.paintBoostUntil > state.time || c.effects.dashUntil > state.time) {
-				drawBlobPath(x, y, r + 12 + Math.sin(state.time * 8) * 2, c.seed + 9.2, .035);
+				drawBlobPath(x, y, r + 12 + Math.sin(state.time * 8) * 2, outlineSeed, outlineWobble * .92, outlineRoughness, deform);
 				ctx.fillStyle = c.effects.spawnShieldUntil > state.time ? "rgba(255,255,255,.22)" : c.effects.shieldUntil > state.time ? "rgba(255,188,211,.18)" : c.effects.speedUntil > state.time || c.effects.dashUntil > state.time ? "rgba(130,202,232,.16)" : c.effects.paintBoostUntil > state.time ? "rgba(255,238,168,.14)" : "rgba(255,219,122,.16)"; ctx.fill();
 			}
-			drawBlobPath(x, y, r + pulse, c.seed, .04); ctx.fillStyle = c.color; ctx.globalAlpha = .93; ctx.fill(); ctx.globalAlpha = 1;
-			ctx.save(); ctx.clip();
+			drawBlobPath(x, y, r + pulse, outlineSeed, outlineWobble, outlineRoughness, deform); ctx.fillStyle = c.color; ctx.globalAlpha = .93; ctx.fill(); ctx.globalAlpha = 1;
+			ctx.save();
+			drawBlobPath(x, y, r + pulse, outlineSeed, outlineWobble, outlineRoughness, deform);
+			ctx.clip();
 			for (let i = 0; i < 4; i++) { const a = c.seed + i * 1.7; const px = x + Math.cos(a) * r * randBySeed(c.seed + i, .02, .32); const py = y + Math.sin(a * 1.41) * r * randBySeed(c.seed + i * 4, .02, .32); ctx.beginPath(); ctx.arc(px, py, r * randBySeed(c.seed + i * 10, .25, .72), 0, TAU); ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,.13)" : "rgba(120,90,60,.035)"; ctx.fill(); }
 			ctx.beginPath(); ctx.arc(x - r * .15, y - r * .2, r * .62, 0, TAU); ctx.fillStyle = moodTint(c); ctx.fill(); ctx.restore();
-			ctx.lineWidth = Math.max(1.2, r * .035); ctx.strokeStyle = "rgba(77,63,45,.17)"; drawBlobPath(x, y, r + pulse, c.seed, .04); ctx.stroke();
-			if (c.type === "player") { ctx.lineWidth = Math.max(2.4, r * .06); ctx.strokeStyle = "rgba(49,119,111,.45)"; drawBlobPath(x, y, r + 3.5 + pulse, c.seed + 8.2, .03); ctx.stroke(); }
+			ctx.lineWidth = Math.max(1.2, r * .035); ctx.strokeStyle = "rgba(77,63,45,.17)"; drawBlobPath(x, y, r + pulse, outlineSeed, outlineWobble, outlineRoughness, deform); ctx.stroke();
+			if (c.type === "player") { ctx.lineWidth = Math.max(2.4, r * .06); ctx.strokeStyle = "rgba(49,119,111,.45)"; drawBlobPath(x, y, r + 3.5 + pulse, outlineSeed, outlineWobble * .9, Math.max(.8, outlineRoughness - .04), deform); ctx.stroke(); }
 			drawFace(c, x, y, r);
 			if (r > 18) { ctx.font = `900 ${clamp(r * .27, 10, 16)}px ui-rounded, Segoe UI, system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,.66)"; ctx.fillStyle = "rgba(72,62,53,.72)"; ctx.strokeText(c.name, x, y + r * .74); ctx.fillText(c.name, x, y + r * .74); }
 			ctx.restore();
@@ -2343,7 +2841,7 @@
 
 		function render(now) {
 			const dpr = Math.max(1, Math.min(2, devicePixelRatio || 1)); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, innerWidth, innerHeight);
-			if (state.mode === "menu") drawMenuBackdrop(now); else drawWorld();
+			if (isWorldReady()) drawWorld(); else drawMenuBackdrop(now);
 			drawScreenTexture(); drawMiniMap();
 		}
 
@@ -2391,7 +2889,6 @@
 			touchPauseButton.addEventListener("click", () => { pulseTouchFeedback(8); togglePause(); });
 			openModeDialogButton.addEventListener("click", openModeDialog);
 			closeModeDialogButton.addEventListener("click", closeModeDialog);
-			cancelModeDialogButton.addEventListener("click", closeModeDialog);
 			applyModeDialogButton.addEventListener("click", applyDraftMode);
 			modeDialog.addEventListener("click", event => { if (event.target === modeDialog) closeModeDialog(); });
 			document.querySelectorAll(".mode-option").forEach(option => option.addEventListener("click", () => { config.draftMode = option.dataset.mode; refreshDialogModeDetails(); }));
@@ -2401,10 +2898,17 @@
 			customEventsToggle.addEventListener("change", () => { config.draftCustom.events = customEventsToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
 			customPowerupsToggle.addEventListener("change", () => { config.draftCustom.powerups = customPowerupsToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
 			customZonesToggle.addEventListener("change", () => { config.draftCustom.zones = customZonesToggle.checked; config.draftMode = "custom"; refreshDialogModeDetails(); });
-			startButton.addEventListener("click", resetGame);
-			demoButton.addEventListener("click", () => { setMenuValues({ bots: 14, foods: 380, stopMotion: true, fps: 10, jitter: 1.2, mode: "classic" }); resetGame(); });
-			hardButton.addEventListener("click", () => { setMenuValues({ bots: 52, foods: 950, stopMotion: true, fps: 12, jitter: 1.9, mode: "custom", custom: { special: true, vines: true, trails: true, events: true, powerups: true, zones: true } }); resetGame(); });
-			restartButton.addEventListener("click", resetGame); backToMenuButton.addEventListener("click", showMainMenu); pauseButton.addEventListener("click", togglePause);
+			startButton.addEventListener("click", enterGameFromMenu);
+			demoButton.addEventListener("click", () => { setMenuValues({ bots: 14, foods: 380, stopMotion: true, fps: 10, jitter: 1.2, mode: "classic" }); startNewArenaAndPlay(); });
+			hardButton.addEventListener("click", () => { setMenuValues({ bots: 52, foods: 950, stopMotion: true, fps: 12, jitter: 1.9, mode: "custom", custom: { special: true, vines: true, trails: true, events: true, powerups: true, zones: true } }); startNewArenaAndPlay(); });
+			if (restartButton) restartButton.addEventListener("click", respawnPlayerInArena);
+			if (backToMenuButton) backToMenuButton.addEventListener("click", () => showMainMenu());
+			pauseButton.addEventListener("click", togglePause);
+			if (playerNameInput) {
+				playerNameInput.addEventListener("input", syncPlayerProfileFromMenu);
+				playerNameInput.addEventListener("blur", syncPlayerProfileFromMenu);
+			}
+			playerColorButtons.forEach(button => button.addEventListener("click", () => choosePlayerColor(button.dataset.color)));
 			hudStopMotionInput.addEventListener("change", () => { config.stopMotion = hudStopMotionInput.checked; menuStopMotionInput.checked = config.stopMotion; });
 			menuStopMotionInput.addEventListener("change", () => { config.stopMotion = menuStopMotionInput.checked; hudStopMotionInput.checked = config.stopMotion; });
 			for (const input of [botCountInput, foodCountInput, visualFpsInput, jitterStrengthInput]) input.addEventListener("input", syncLabels);
@@ -2412,7 +2916,7 @@
 			jitterStrengthInput.addEventListener("input", () => { config.jitterStrength = Number(jitterStrengthInput.value); });
 		}
 
-		function boot() { config.touchControls = isTouchDevice; resize(); createPaperPattern(); syncLabels(); refreshModeSummary(); refreshDialogModeDetails(); updateTouchUIVisibility(); bindEvents(); requestAnimationFrame(loop); }
+		function boot() { config.touchControls = isTouchDevice; resize(); createPaperPattern(); syncLabels(); refreshModeSummary(); refreshDialogModeDetails(); buildArena(true); showMainMenu(); updateTouchUIVisibility(); bindEvents(); requestAnimationFrame(loop); }
 		boot();
 	})();
 	</script>
