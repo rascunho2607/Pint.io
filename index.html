@@ -294,6 +294,77 @@
 		}
 		.color-swatch:hover { transform: translateY(-1px); filter: brightness(1.03); }
 		.color-swatch.active { outline: 3px solid rgba(47,119,111,.42); outline-offset: 2px; }
+
+		.player-color-preview span { transition: background .18s ease, transform .18s ease; }
+		.player-skin-preview-canvas {
+			position: absolute; inset: 7px; width: calc(100% - 14px); height: calc(100% - 14px);
+			border-radius: 999px; pointer-events: none; filter: drop-shadow(0 5px 10px rgba(70,50,30,.10));
+		}
+		.skin-open-button { width: 100%; margin-top: 12px; padding: 11px 13px; font-size: 13px; background: linear-gradient(145deg, #f1d6e2, #d6bedf); }
+		.skin-dialog { width: min(1040px, calc(100vw - 30px)); max-height: min(820px, calc(100vh - 30px)); }
+		.skin-picker-layout { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(300px, .88fr); gap: 16px; padding: 12px 24px 24px; overflow: auto; flex: 1 1 auto; }
+		.skin-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; align-content: start; }
+		.skin-option {
+			position: relative; min-height: 116px; padding: 10px; border-radius: 22px; border: 1px solid rgba(80,65,45,.1);
+			background: rgba(255,255,255,.38); display: grid; grid-template-rows: 1fr auto; gap: 8px; text-align: left;
+		}
+		.skin-option:hover { transform: translateY(-1px); background: rgba(255,255,255,.54); }
+		.skin-option.active { border-color: rgba(47,119,111,.45); background: rgba(195,229,219,.44); box-shadow: inset 0 0 0 2px rgba(47,119,111,.12), 0 9px 20px rgba(75,109,102,.08); }
+		.skin-thumb {
+			position: relative; width: 100%; min-height: 58px; border-radius: 18px; overflow: hidden;
+			background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.75), rgba(234,221,195,.55));
+			border: 1px solid rgba(80,65,45,.08); display: grid; place-items: center;
+		}
+		.skin-thumb canvas { width: 54px; height: 54px; display: block; }
+		.skin-option-name { display: block; font-size: 12px; font-weight: 950; color: #4f473f; line-height: 1.05; }
+		.skin-option-cat { display: block; margin-top: 3px; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; font-weight: 950; color: #8b7d70; }
+		.skin-editor-panel { padding: 16px; border-radius: 28px; border: 1px solid rgba(80,65,45,.1); background: rgba(255,255,255,.38); align-self: start; }
+		.skin-editor-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+		.skin-editor-title { margin: 0; font-size: 24px; line-height: 1; letter-spacing: -.05em; font-weight: 950; color: #443d36; }
+		.skin-editor-desc { margin: 7px 0 0; font-size: 12px; line-height: 1.38; font-weight: 800; color: #766b60; }
+		.skin-editor-stage {
+			position: relative; width: 100%; aspect-ratio: 1; border-radius: 26px; padding: 12px;
+			background:
+				linear-gradient(45deg, rgba(100,80,50,.06) 25%, transparent 25%, transparent 75%, rgba(100,80,50,.06) 75%),
+				linear-gradient(45deg, rgba(100,80,50,.06) 25%, transparent 25%, transparent 75%, rgba(100,80,50,.06) 75%),
+				rgba(255,255,255,.34);
+			background-position: 0 0, 10px 10px; background-size: 20px 20px;
+			border: 1px solid rgba(80,65,45,.09);
+		}
+		#skinEditorCanvas { width: 100%; height: 100%; border-radius: 50%; display: block; background: rgba(255,255,255,.18); touch-action: none; cursor: crosshair; box-shadow: inset 0 0 0 2px rgba(80,65,45,.08); }
+		.skin-tool-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin-top: 12px; }
+		.skin-tool-button { padding: 9px 7px; font-size: 11px; border-radius: 15px; background: rgba(255,255,255,.46); }
+		.skin-tool-button.active { background: linear-gradient(145deg, #dbecea, #b9d6d3); box-shadow: inset 0 0 0 2px rgba(47,119,111,.14); }
+		.skin-editor-controls { display: grid; grid-template-columns: 72px 1fr; gap: 10px; margin-top: 12px; align-items: end; }
+		.skin-editor-controls label { display: grid; gap: 6px; font-size: 11px; font-weight: 950; color: #6b6055; }
+		.skin-editor-controls input[type="color"] { width: 100%; height: 42px; border: 0; padding: 4px; border-radius: 13px; background: rgba(255,255,255,.55); }
+		.skin-editor-controls input[type="range"] { width: 100%; accent-color: #9fbfbb; }
+		.skin-editor-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+		.skin-editor-actions button { padding: 10px 12px; font-size: 12px; }
+
+		/* Correção: o canvas principal do jogo é fixo, mas os canvases de skin precisam ser locais. */
+		.skin-thumb canvas {
+			position: static !important; inset: auto !important; width: 68px !important; height: 68px !important;
+			display: block !important; cursor: default !important; pointer-events: none; border-radius: 999px;
+		}
+		.player-skin-preview-canvas {
+			position: absolute !important; inset: 7px !important; width: calc(100% - 14px) !important; height: calc(100% - 14px) !important;
+		}
+		#skinEditorCanvas {
+			position: relative !important; inset: auto !important; width: 100% !important; height: 100% !important;
+		}
+		#skinDialog .skin-picker-layout { grid-template-columns: 1fr; }
+		#skinDialog .skin-editor-panel { display: none; }
+		.skin-dialog { width: min(900px, calc(100vw - 30px)); }
+		.skin-grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+		.skin-thumb { min-height: 78px; }
+		.custom-skin-overlay { z-index: 44; }
+		.custom-skin-dialog-panel { width: min(520px, calc(100vw - 28px)); max-height: min(820px, calc(100vh - 28px)); }
+		.custom-skin-editor-mount { padding: 0 24px 24px; overflow: auto; }
+		.custom-skin-editor-mount .skin-editor-panel { display: block; padding: 16px; background: rgba(255,255,255,.42); }
+		.custom-skin-editor-mount .skin-editor-stage { width: min(330px, 100%); margin: 0 auto; }
+		.custom-skin-editor-mount .skin-editor-actions { grid-template-columns: 1fr 1fr; }
+
 		.play-panel { display: flex; flex-direction: column; justify-content: center; text-align: center; gap: 12px; }
 		.play-button {
 			width: 100%; min-height: 72px; border-radius: 24px; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.05em;
@@ -320,6 +391,9 @@
 
 		@media (max-width: 950px) {
 			.grid, .mode-summary, .mode-picker-layout, .menu-panels, .room-grid { grid-template-columns: 1fr; }
+
+			.skin-picker-layout { grid-template-columns: 1fr; }
+			.skin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 			.mode-option-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 			.menu-compact-head { flex-direction: column; }
 			.dialog-head { align-items: flex-start; flex-direction: column; }
@@ -332,6 +406,8 @@
 		}
 		@media (max-width: 650px) {
 			.card { padding: 28px 20px; border-radius: 28px; }
+			.skin-grid { grid-template-columns: 1fr; }
+			.skin-tool-grid { grid-template-columns: repeat(3, 1fr); }
 			.play-card { padding: 14px; }
 			.mode-option-list { grid-template-columns: 1fr; }
 			.player-preview-row { grid-template-columns: 58px 1fr; }
@@ -363,7 +439,7 @@
 						<div class="panel-kicker">Jogador</div>
 						<div class="panel-title">Seu blob</div>
 						<div class="player-preview-row">
-							<div id="playerColorPreview" class="player-color-preview" aria-hidden="true"><span></span></div>
+							<div id="playerColorPreview" class="player-color-preview" aria-hidden="true"><span id="playerBasePreviewBlob"></span><canvas id="playerSkinPreviewCanvas" class="player-skin-preview-canvas" width="128" height="128"></canvas></div>
 							<div class="name-field">
 								<label for="playerNameInput">Nome</label>
 								<input id="playerNameInput" class="player-name-input" type="text" maxlength="16" value="Você" placeholder="Seu nome" autocomplete="off" />
@@ -380,6 +456,7 @@
 							<button class="color-swatch" type="button" data-color="#f2b8a0" style="--swatch:#f2b8a0" aria-label="Pêssego"></button>
 							<button class="color-swatch" type="button" data-color="#e7d99f" style="--swatch:#e7d99f" aria-label="Areia"></button>
 						</div>
+						<button id="openSkinDialogButton" class="skin-open-button" type="button">Skins e rabiscos</button>
 					</div>
 
 					<div class="menu-panel play-panel">
@@ -422,6 +499,67 @@
 				</div>
 			</div>
 		</section>
+
+
+		<div id="skinDialog" class="modal-overlay" aria-hidden="true">
+			<div class="mode-dialog skin-dialog" role="dialog" aria-modal="true" aria-labelledby="skinDialogTitle">
+				<div class="dialog-head">
+					<div>
+						<h2 id="skinDialogTitle" class="dialog-title">Skins do blob</h2>
+						<p class="dialog-subtitle">Escolha planeta, bicho, dinossauro, emoji, bandeira ou rabisque sua própria pele no estilo papel e tinta.</p>
+					</div>
+					<div class="dialog-actions-top">
+						<button id="closeSkinDialogButton" class="close-button" type="button">Fechar</button>
+						<button id="applySkinDialogButton" class="apply-mode-button" type="button">Usar skin</button>
+					</div>
+				</div>
+
+				<div class="skin-picker-layout">
+					<div id="skinOptionList" class="skin-grid" aria-label="Escolher skin do blob"></div>
+
+					<div class="skin-editor-panel">
+						<div class="skin-editor-head">
+							<div>
+								<h3 class="skin-editor-title">Personalizada</h3>
+								<p class="skin-editor-desc">A primeira opção é sua. Rabisque com lápis, pincel, borracha, spray ou balde e aplique no blob.</p>
+							</div>
+						</div>
+						<div class="skin-editor-stage"><canvas id="skinEditorCanvas" width="256" height="256"></canvas></div>
+						<div class="skin-tool-grid" role="toolbar" aria-label="Ferramentas de desenho da skin">
+							<button class="skin-tool-button active" type="button" data-tool="pencil">Lápis</button>
+							<button class="skin-tool-button" type="button" data-tool="brush">Pincel</button>
+							<button class="skin-tool-button" type="button" data-tool="eraser">Borracha</button>
+							<button class="skin-tool-button" type="button" data-tool="spray">Spray</button>
+							<button class="skin-tool-button" type="button" data-tool="bucket">Balde</button>
+						</div>
+						<div class="skin-editor-controls">
+							<label>Cor <input id="skinEditorColor" type="color" value="#6bbf8f" /></label>
+							<label>Tamanho <input id="skinEditorSize" type="range" min="2" max="42" value="12" /></label>
+						</div>
+						<div class="skin-editor-actions">
+							<button id="clearCustomSkinButton" class="ghost" type="button">Limpar</button>
+							<button id="useCustomSkinButton" type="button">Aplicar rabisco</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="customSkinDialog" class="modal-overlay custom-skin-overlay" aria-hidden="true">
+			<div class="mode-dialog custom-skin-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="customSkinDialogTitle">
+				<div class="dialog-head">
+					<div>
+						<h2 id="customSkinDialogTitle" class="dialog-title">Criar skin</h2>
+						<p class="dialog-subtitle">Pinte só essa telinha redonda. Depois aplique e ela vira a pele do blob.</p>
+					</div>
+					<div class="dialog-actions-top">
+						<button id="closeCustomSkinDialogButton" class="close-button" type="button">Voltar</button>
+						<button id="applyCustomSkinDialogButton" class="apply-mode-button" type="button">Aplicar</button>
+					</div>
+				</div>
+				<div id="customSkinEditorMount" class="custom-skin-editor-mount"></div>
+			</div>
+		</div>
 
 		<div id="modeDialog" class="modal-overlay" aria-hidden="true">
 			<div class="mode-dialog" role="dialog" aria-modal="true" aria-labelledby="modeDialogTitle">
@@ -650,7 +788,24 @@
 		const pauseButton = document.getElementById("pauseButton");
 		const playerNameInput = document.getElementById("playerNameInput");
 		const playerColorPreview = document.getElementById("playerColorPreview");
+		const playerSkinPreviewCanvas = document.getElementById("playerSkinPreviewCanvas");
 		const playerColorButtons = Array.from(document.querySelectorAll(".color-swatch"));
+		const openSkinDialogButton = document.getElementById("openSkinDialogButton");
+		const skinDialog = document.getElementById("skinDialog");
+		const closeSkinDialogButton = document.getElementById("closeSkinDialogButton");
+		const applySkinDialogButton = document.getElementById("applySkinDialogButton");
+		const skinOptionList = document.getElementById("skinOptionList");
+		const skinEditorCanvas = document.getElementById("skinEditorCanvas");
+		const skinEditorCtx = skinEditorCanvas ? skinEditorCanvas.getContext("2d", { willReadFrequently: true }) : null;
+		const skinEditorColor = document.getElementById("skinEditorColor");
+		const skinEditorSize = document.getElementById("skinEditorSize");
+		const clearCustomSkinButton = document.getElementById("clearCustomSkinButton");
+		const useCustomSkinButton = document.getElementById("useCustomSkinButton");
+		const customSkinDialog = document.getElementById("customSkinDialog");
+		const customSkinEditorMount = document.getElementById("customSkinEditorMount");
+		const closeCustomSkinDialogButton = document.getElementById("closeCustomSkinDialogButton");
+		const applyCustomSkinDialogButton = document.getElementById("applyCustomSkinDialogButton");
+		const skinToolButtons = Array.from(document.querySelectorAll(".skin-tool-button"));
 		const menuNotice = document.getElementById("menuNotice");
 
 		const botCountInput = document.getElementById("botCount");
@@ -789,6 +944,8 @@
 			cameraSmooth: 7.5,
 			playerName: "Você",
 			playerColor: "#9fd6cf",
+			playerSkin: "plain",
+			customSkinDataUrl: "",
 			touchControls: isTouchDevice,
 			mode: "classic",
 			custom: {
@@ -809,6 +966,36 @@
 				zones: false
 			}
 		};
+
+
+		const skinCatalog = [
+			{ key: "custom", label: "Criar a minha", category: "Personalizada", desc: "Rabisque sua própria skin." },
+			{ key: "plain", label: "Cor lisa", category: "Base", desc: "Usa a cor escolhida no menu." },
+			{ key: "earth", label: "Terra", category: "Planetas", desc: "Oceanos, continentes e nuvens." },
+			{ key: "mars", label: "Marte", category: "Planetas", desc: "Vermelho, crateras e poeira." },
+			{ key: "moon", label: "Lua", category: "Planetas", desc: "Cinza, crateras e sombra suave." },
+			{ key: "sun", label: "Sol", category: "Planetas", desc: "Brilho quente e manchas solares." },
+			{ key: "jupiter", label: "Júpiter", category: "Planetas", desc: "Faixas gasosas e mancha gigante." },
+			{ key: "ladybug", label: "Joaninha", category: "Animais", desc: "Casco vermelho com pintinhas." },
+			{ key: "spider", label: "Aranha", category: "Animais", desc: "Perninhas e corpo escuro." },
+			{ key: "bee", label: "Abelha", category: "Insetos", desc: "Listras e asinhas." },
+			{ key: "butterfly", label: "Borboleta", category: "Insetos", desc: "Asas coloridas de tinta." },
+			{ key: "ant", label: "Formiga", category: "Insetos", desc: "Segmentos e antenas." },
+			{ key: "trex", label: "T-Rex", category: "Dinossauros", desc: "Dino verde com dentinhos." },
+			{ key: "triceratops", label: "Triceratops", category: "Dinossauros", desc: "Chifres e gola." },
+			{ key: "stego", label: "Stegosaurus", category: "Dinossauros", desc: "Placas nas costas." },
+			{ key: "raptor", label: "Raptor", category: "Dinossauros", desc: "Olhar rápido e listras." },
+			{ key: "emoji_smile", label: "Sorriso", category: "Emojis", emoji: "😄", desc: "Carinha feliz." },
+			{ key: "emoji_cool", label: "Óculos", category: "Emojis", emoji: "😎", desc: "Blob estiloso." },
+			{ key: "emoji_fire", label: "Fogo", category: "Emojis", emoji: "🔥", desc: "Energia caótica." },
+			{ key: "emoji_ghost", label: "Fantasma", category: "Emojis", emoji: "👻", desc: "Assustador fofo." },
+			{ key: "flag_br", label: "Brasil", category: "Bandeiras", flag: "🇧🇷", desc: "Bandeira do Brasil." },
+			{ key: "flag_us", label: "Estados Unidos", category: "Bandeiras", flag: "🇺🇸", desc: "Bandeira dos EUA." },
+			{ key: "flag_jp", label: "Japão", category: "Bandeiras", flag: "🇯🇵", desc: "Bandeira do Japão." },
+			{ key: "flag_pt", label: "Portugal", category: "Bandeiras", flag: "🇵🇹", desc: "Bandeira de Portugal." },
+			{ key: "flag_ar", label: "Argentina", category: "Bandeiras", flag: "🇦🇷", desc: "Bandeira da Argentina." },
+			{ key: "flag_fr", label: "França", category: "Bandeiras", flag: "🇫🇷", desc: "Bandeira da França." }
+		];
 
 		const state = {
 			mode: "menu",
@@ -842,6 +1029,11 @@
 			camera: { x: 2600, y: 2600, zoom: .8 },
 			ambientCamera: { x: 2600, y: 2600, nextAt: 0 }
 		};
+
+		let customSkinImage = null;
+		let skinEditorTool = "pencil";
+		let skinEditorDrawing = false;
+		let skinEditorLast = null;
 
 		function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 		function lerp(a, b, t) { return a + (b - a) * t; }
@@ -890,6 +1082,7 @@
 				this.x = x; this.y = y; this.vx = 0; this.vy = 0;
 				this.radius = radius; this.mass = radius * radius;
 				this.color = color; this.name = name; this.type = type; this.personality = personality;
+				this.skin = type === "player" ? config.playerSkin : "plain";
 				this.alive = true; this.seed = Math.random() * 10000;
 				this.wanderX = x; this.wanderY = y; this.nextThink = 0;
 				this.mood = "calmo"; this.moodStrength = 0; this.moodUntil = 0; this.rewardUntil = 0; this.lastAteAt = 0;
@@ -1242,6 +1435,7 @@
 			for (const part of getPlayerCells()) {
 				part.name = config.playerName;
 				part.color = config.playerColor;
+				part.skin = config.playerSkin;
 			}
 		}
 
@@ -1249,6 +1443,8 @@
 			if (playerNameInput && document.activeElement !== playerNameInput) playerNameInput.value = config.playerName;
 			if (playerColorPreview) playerColorPreview.style.setProperty("--player-color", config.playerColor);
 			playerColorButtons.forEach(button => button.classList.toggle("active", button.dataset.color === config.playerColor));
+			renderPlayerSkinPreview();
+			refreshSkinOptionSelection();
 		}
 
 		function syncPlayerProfileFromMenu() {
@@ -1263,6 +1459,461 @@
 			config.playerColor = color;
 			updateLivingPlayerProfile();
 			refreshPlayerProfileUI();
+		}
+
+		function skinByKey(key) { return skinCatalog.find(s => s.key === key) || skinCatalog[1]; }
+		function isCustomSkinReady() { return !!config.customSkinDataUrl && !!customSkinImage; }
+		function skinIsEmoji(key) { return key && key.startsWith("emoji_"); }
+		function skinIsFlag(key) { return key && key.startsWith("flag_"); }
+
+		const pixelSkinSprites = {
+			trex: {
+				palette: { A: "#2f4f2d", B: "#587e46", C: "#8bcf72", D: "#d8efc3", E: "#faf5df" },
+				rows: [
+					"................",
+					"................",
+					".......BBB......",
+					"......BCCBB.....",
+					".....BCCCCBBB...",
+					"....BCCCCCCCCBB.",
+					"....BCCCCCDCCCB.",
+					"....BCCCCCCCCBB.",
+					"...BBCCCCCBBB...",
+					"..BBBBCCCCBB....",
+					".BB..BBCCBB.....",
+					".....BBAABB.....",
+					".....AA..AA.....",
+					"................",
+					"................",
+					"................"
+				]
+			},
+			triceratops: {
+				palette: { A: "#5a4d2a", B: "#7b6a38", C: "#a18d4e", D: "#d9d1a9", E: "#fff8ec" },
+				rows: [
+					"................",
+					"................",
+					".....D....D.....",
+					"....DDBBBDD.....",
+					"...DDCCCCCDD....",
+					"..DDCCCCCCCCDD..",
+					"..DCCCCCCECCCDB.",
+					"..DCCCCCCCCCCDB.",
+					"..BBCCCCCCCCCBB.",
+					"....BBCCCBBB....",
+					"....AA.BB.AA....",
+					"...AA......AA...",
+					"................",
+					"................",
+					"................",
+					"................"
+				]
+			},
+			stego: {
+				palette: { A: "#4d5c2e", B: "#708646", C: "#9dba63", D: "#d06c4d", E: "#fff3db" },
+				rows: [
+					"................",
+					".....D.D.D......",
+					"....DCDCDCD.....",
+					"...BCCCCCCCCB...",
+					"..BCCCCCCCCCCB..",
+					"..BCCCCCDCCCCB..",
+					"..BBCCCCCCCCBB..",
+					"....BBCCCCBB....",
+					"....B.BCC.B.....",
+					"...AA.AA..AA....",
+					"......AA........",
+					"................",
+					"................",
+					"................",
+					"................",
+					"................"
+				]
+			},
+			raptor: {
+				palette: { A: "#3d4d2d", B: "#587141", C: "#85a95e", D: "#e5d88e", E: "#fff7e3" },
+				rows: [
+					"................",
+					"................",
+					"........BB......",
+					".......BCCB.....",
+					".....BBCCCCBB...",
+					"....BCCCCCCCCB..",
+					"....BCCCCDCCCB..",
+					"....BBCCCCCCBB..",
+					".....BBCCCCBB...",
+					"....BB.BCCB.....",
+					"...AA..BAA......",
+					"..AA....AA......",
+					"................",
+					"................",
+					"................",
+					"................"
+				]
+			}
+		};
+
+		function drawPixelSprite(g, spriteKey, x, y, r) {
+			const sprite = pixelSkinSprites[spriteKey];
+			if (!sprite) return false;
+			const rows = sprite.rows;
+			const cols = rows[0].length;
+			const pixel = Math.max(2, Math.floor((r * 1.55) / cols));
+			const totalW = cols * pixel;
+			const totalH = rows.length * pixel;
+			const ox = x - totalW / 2;
+			const oy = y - totalH / 2;
+			for (let row = 0; row < rows.length; row++) {
+				for (let col = 0; col < cols; col++) {
+					const code = rows[row][col];
+					if (code === ".") continue;
+					const color = sprite.palette[code];
+					if (!color) continue;
+					g.fillStyle = color;
+					g.fillRect(Math.round(ox + col * pixel), Math.round(oy + row * pixel), pixel, pixel);
+				}
+			}
+			g.strokeStyle = "rgba(77,63,45,.18)";
+			g.lineWidth = Math.max(1, pixel * .14);
+			g.strokeRect(Math.round(ox) + .5, Math.round(oy) + .5, totalW, totalH);
+			return true;
+		}
+
+		function drawFlagPattern(g, skinKey, x, y, r) {
+			const left = x - r, top = y - r, size = r * 2;
+			if (skinKey === "flag_br") {
+				g.fillStyle = "#1f8a52"; g.fillRect(left, top, size, size);
+				g.fillStyle = "#f4cd45"; g.beginPath(); g.moveTo(x, top + r * .22); g.lineTo(left + size - r * .22, y); g.lineTo(x, top + size - r * .22); g.lineTo(left + r * .22, y); g.closePath(); g.fill();
+				g.fillStyle = "#255aa8"; g.beginPath(); g.arc(x, y, r * .34, 0, TAU); g.fill();
+				g.strokeStyle = "rgba(255,255,255,.9)"; g.lineWidth = Math.max(2, r * .045); g.beginPath(); g.arc(x, y + r * .02, r * .23, Math.PI * 1.12, Math.PI * 1.9); g.stroke();
+				return;
+			}
+			if (skinKey === "flag_us") {
+				const stripeH = size / 7;
+				for (let i = 0; i < 7; i++) { g.fillStyle = i % 2 === 0 ? "#c73b42" : "#fff4f1"; g.fillRect(left, top + i * stripeH, size, stripeH + 1); }
+				g.fillStyle = "#23458a"; g.fillRect(left, top, size * .54, stripeH * 4.1);
+				g.fillStyle = "rgba(255,255,255,.95)";
+				for (let row = 0; row < 3; row++) for (let col = 0; col < 4; col++) { g.beginPath(); g.arc(left + size * .08 + col * size * .1, top + stripeH * .55 + row * stripeH * .95, r * .04, 0, TAU); g.fill(); }
+				return;
+			}
+			if (skinKey === "flag_jp") {
+				g.fillStyle = "#fffaf2"; g.fillRect(left, top, size, size);
+				g.fillStyle = "#d84848"; g.beginPath(); g.arc(x, y, r * .4, 0, TAU); g.fill();
+				return;
+			}
+			if (skinKey === "flag_pt") {
+				g.fillStyle = "#1a8a57"; g.fillRect(left, top, size * .42, size);
+				g.fillStyle = "#c33737"; g.fillRect(left + size * .42, top, size * .58, size);
+				g.fillStyle = "#f4cd45"; g.beginPath(); g.arc(left + size * .42, y, r * .18, 0, TAU); g.fill();
+				g.fillStyle = "#fff4f1"; g.fillRect(left + size * .34, y - r * .1, r * .18, r * .2);
+				return;
+			}
+			if (skinKey === "flag_ar") {
+				g.fillStyle = "#77bfe8"; g.fillRect(left, top, size, size * .33);
+				g.fillStyle = "#fffaf1"; g.fillRect(left, top + size * .33, size, size * .34);
+				g.fillStyle = "#77bfe8"; g.fillRect(left, top + size * .67, size, size * .33);
+				g.fillStyle = "#f4c64a"; g.beginPath(); g.arc(x, y, r * .14, 0, TAU); g.fill();
+				return;
+			}
+			if (skinKey === "flag_fr") {
+				g.fillStyle = "#2d66b0"; g.fillRect(left, top, size / 3, size);
+				g.fillStyle = "#fffaf1"; g.fillRect(left + size / 3, top, size / 3, size);
+				g.fillStyle = "#d54a54"; g.fillRect(left + size * 2 / 3, top, size / 3 + 1, size);
+				return;
+			}
+			g.fillStyle = "#fff8e8"; g.fillRect(left, top, size, size);
+		}
+
+		function saveSkinPreferences() {
+			try {
+				localStorage.setItem("pintio.skinProfile", JSON.stringify({ playerSkin: config.playerSkin, customSkinDataUrl: config.customSkinDataUrl }));
+			} catch (_) {}
+		}
+
+		function loadSkinPreferences() {
+			try {
+				const raw = localStorage.getItem("pintio.skinProfile");
+				if (!raw) return;
+				const data = JSON.parse(raw);
+				if (data && skinByKey(data.playerSkin)) config.playerSkin = data.playerSkin || "plain";
+				if (data && typeof data.customSkinDataUrl === "string") config.customSkinDataUrl = data.customSkinDataUrl;
+				loadCustomSkinImage();
+			} catch (_) {}
+		}
+
+		function loadCustomSkinImage() {
+			customSkinImage = null;
+			if (!config.customSkinDataUrl) return;
+			const img = new Image();
+			img.onload = () => { customSkinImage = img; renderPlayerSkinPreview(); renderSkinOptionThumbs(); };
+			img.src = config.customSkinDataUrl;
+		}
+
+		function choosePlayerSkin(key, persist = true) {
+			if (!skinByKey(key)) key = "plain";
+			config.playerSkin = key;
+			updateLivingPlayerProfile();
+			refreshPlayerProfileUI();
+			if (persist) saveSkinPreferences();
+			if (key === "custom" && !config.customSkinDataUrl) seedCustomSkinCanvas();
+		}
+
+		function mountCustomSkinEditorPopup() {
+			const panel = document.querySelector(".skin-editor-panel");
+			if (panel && customSkinEditorMount && panel.parentElement !== customSkinEditorMount) customSkinEditorMount.appendChild(panel);
+		}
+
+		function openCustomSkinDialog() {
+			if (!customSkinDialog) return;
+			mountCustomSkinEditorPopup();
+			if (!config.customSkinDataUrl) seedCustomSkinCanvas();
+			customSkinDialog.classList.add("active");
+			customSkinDialog.setAttribute("aria-hidden", "false");
+		}
+
+		function closeCustomSkinDialog() {
+			if (!customSkinDialog) return;
+			customSkinDialog.classList.remove("active");
+			customSkinDialog.setAttribute("aria-hidden", "true");
+		}
+
+		function openSkinDialog() {
+			if (!skinDialog) return;
+			skinDialog.classList.add("active");
+			skinDialog.setAttribute("aria-hidden", "false");
+			refreshSkinOptionSelection();
+			renderSkinOptionThumbs();
+		}
+
+		function closeSkinDialog() {
+			closeCustomSkinDialog();
+			if (!skinDialog) return;
+			skinDialog.classList.remove("active");
+			skinDialog.setAttribute("aria-hidden", "true");
+		}
+
+		function applySkinDialog() {
+			updateLivingPlayerProfile();
+			saveSkinPreferences();
+			closeSkinDialog();
+			showToast(`Skin: ${skinByKey(config.playerSkin).label}`);
+		}
+
+		function buildSkinOptionList() {
+			if (!skinOptionList) return;
+			skinOptionList.innerHTML = "";
+			for (const skin of skinCatalog) {
+				const button = document.createElement("button");
+				button.type = "button";
+				button.className = "skin-option";
+				button.dataset.skin = skin.key;
+				button.title = skin.desc || skin.label;
+				button.innerHTML = `<span class="skin-thumb"><canvas width="96" height="96" aria-hidden="true"></canvas></span><span><span class="skin-option-name">${skin.label}</span><span class="skin-option-cat">${skin.category}</span></span>`;
+				button.addEventListener("click", () => {
+					if (skin.key === "custom") {
+						choosePlayerSkin("custom", false);
+						refreshSkinOptionSelection();
+						openCustomSkinDialog();
+						return;
+					}
+					choosePlayerSkin(skin.key);
+				});
+				skinOptionList.appendChild(button);
+			}
+			renderSkinOptionThumbs();
+			refreshSkinOptionSelection();
+		}
+
+		function refreshSkinOptionSelection() {
+			if (!skinOptionList) return;
+			skinOptionList.querySelectorAll(".skin-option").forEach(button => button.classList.toggle("active", button.dataset.skin === config.playerSkin));
+		}
+
+		function renderSkinOptionThumbs() {
+			if (!skinOptionList) return;
+			for (const button of skinOptionList.querySelectorAll(".skin-option")) {
+				const thumb = button.querySelector("canvas");
+				if (!thumb) continue;
+				drawSkinPreviewToCanvas(thumb, button.dataset.skin, 49.123);
+			}
+		}
+
+		function renderPlayerSkinPreview() {
+			if (!playerSkinPreviewCanvas) return;
+			drawSkinPreviewToCanvas(playerSkinPreviewCanvas, config.playerSkin, 12.345);
+		}
+
+		function drawSkinPreviewToCanvas(targetCanvas, skinKey, seed = 1) {
+			const g = targetCanvas.getContext("2d");
+			const w = targetCanvas.width, h = targetCanvas.height;
+			g.clearRect(0, 0, w, h);
+			const r = Math.min(w, h) * .38, x = w / 2, y = h / 2;
+			g.save();
+			g.beginPath();
+			g.ellipse(x + r * .08, y + r * .18, r * .9, r * .34, 0, 0, TAU);
+			g.fillStyle = "rgba(80,55,35,.13)";
+			g.fill();
+			drawBlobPath(x, y, r, seed, .035, 1, null, g);
+			g.fillStyle = config.playerColor;
+			g.fill();
+			g.save();
+			drawBlobPath(x, y, r, seed, .035, 1, null, g);
+			g.clip();
+			drawSkinPattern(g, skinKey, x, y, r, { seed, color: config.playerColor, visual: {}, effects: {}, mood: "calmo", rewardUntil: 0, lastAteAt: -99 });
+			g.restore();
+			drawBlobPath(x, y, r, seed, .035, 1, null, g);
+			g.lineWidth = Math.max(2, r * .055);
+			g.strokeStyle = skinKey === "plain" ? "rgba(77,63,45,.17)" : "rgba(77,63,45,.24)";
+			g.stroke();
+			if (skinKey === "plain") drawSimplePreviewFace(g, x, y, r);
+			g.restore();
+		}
+
+		function drawSimplePreviewFace(g, x, y, r) {
+			g.save();
+			g.fillStyle = "rgba(255,255,255,.72)";
+			g.strokeStyle = "rgba(70,57,45,.16)";
+			g.lineWidth = Math.max(1, r * .02);
+			for (const side of [-1, 1]) { g.beginPath(); g.arc(x + side * r * .24, y - r * .1, r * .08, 0, TAU); g.fill(); g.stroke(); g.beginPath(); g.arc(x + side * r * .25, y - r * .1, r * .038, 0, TAU); g.fillStyle = "rgba(62,54,47,.78)"; g.fill(); g.fillStyle = "rgba(255,255,255,.72)"; }
+			g.beginPath(); g.arc(x, y + r * .12, r * .2, .18 * Math.PI, .82 * Math.PI); g.strokeStyle = "rgba(66,54,43,.62)"; g.lineWidth = Math.max(1.4, r * .035); g.stroke();
+			g.restore();
+		}
+
+		function setupSkinEditorCanvas() {
+			if (!skinEditorCanvas || !skinEditorCtx) return;
+			seedCustomSkinCanvas();
+			skinEditorTool = "pencil";
+			skinToolButtons.forEach(button => button.addEventListener("click", () => {
+				skinEditorTool = button.dataset.tool || "pencil";
+				skinToolButtons.forEach(b => b.classList.toggle("active", b === button));
+			}));
+			const pointerStart = event => {
+				event.preventDefault();
+				skinEditorDrawing = true;
+				skinEditorCanvas.setPointerCapture?.(event.pointerId);
+				const p = skinEditorPoint(event);
+				skinEditorLast = p;
+				if (skinEditorTool === "bucket") { floodFillSkinEditor(p.x, p.y, skinEditorColor.value); skinEditorDrawing = false; skinEditorLast = null; return; }
+				paintSkinEditorAt(p.x, p.y, p.x, p.y);
+			};
+			const pointerMove = event => {
+				if (!skinEditorDrawing) return;
+				event.preventDefault();
+				const p = skinEditorPoint(event);
+				const last = skinEditorLast || p;
+				paintSkinEditorAt(p.x, p.y, last.x, last.y);
+				skinEditorLast = p;
+			};
+			const pointerEnd = () => { skinEditorDrawing = false; skinEditorLast = null; };
+			skinEditorCanvas.addEventListener("pointerdown", pointerStart);
+			skinEditorCanvas.addEventListener("pointermove", pointerMove);
+			skinEditorCanvas.addEventListener("pointerup", pointerEnd);
+			skinEditorCanvas.addEventListener("pointercancel", pointerEnd);
+		}
+
+		function seedCustomSkinCanvas() {
+			if (!skinEditorCtx || !skinEditorCanvas) return;
+			skinEditorCtx.clearRect(0, 0, skinEditorCanvas.width, skinEditorCanvas.height);
+			if (config.customSkinDataUrl) {
+				const img = new Image();
+				img.onload = () => skinEditorCtx.drawImage(img, 0, 0, skinEditorCanvas.width, skinEditorCanvas.height);
+				img.src = config.customSkinDataUrl;
+				return;
+			}
+			skinEditorCtx.save();
+			skinEditorCtx.beginPath();
+			skinEditorCtx.arc(128, 128, 118, 0, TAU);
+			skinEditorCtx.clip();
+			const grad = skinEditorCtx.createRadialGradient(88, 76, 12, 128, 128, 132);
+			grad.addColorStop(0, "rgba(255,255,255,.55)");
+			grad.addColorStop(1, config.playerColor);
+			skinEditorCtx.fillStyle = grad;
+			skinEditorCtx.fillRect(0, 0, 256, 256);
+			skinEditorCtx.restore();
+		}
+
+		function skinEditorPoint(event) {
+			const rect = skinEditorCanvas.getBoundingClientRect();
+			return { x: clamp((event.clientX - rect.left) / rect.width * skinEditorCanvas.width, 0, skinEditorCanvas.width - 1), y: clamp((event.clientY - rect.top) / rect.height * skinEditorCanvas.height, 0, skinEditorCanvas.height - 1) };
+		}
+
+		function paintSkinEditorAt(x, y, lastX, lastY) {
+			if (!skinEditorCtx) return;
+			const size = Number(skinEditorSize?.value || 12);
+			skinEditorCtx.save();
+			skinEditorCtx.beginPath();
+			skinEditorCtx.arc(128, 128, 118, 0, TAU);
+			skinEditorCtx.clip();
+			if (skinEditorTool === "eraser") skinEditorCtx.globalCompositeOperation = "destination-out";
+			else skinEditorCtx.globalCompositeOperation = "source-over";
+			if (skinEditorTool === "spray") {
+				skinEditorCtx.fillStyle = skinEditorColor.value;
+				const dots = Math.max(8, Math.floor(size * 1.7));
+				for (let i = 0; i < dots; i++) {
+					const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * size * 1.4;
+					skinEditorCtx.globalAlpha = .18 + Math.random() * .34;
+					skinEditorCtx.beginPath(); skinEditorCtx.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, Math.max(1.1, size * .075), 0, TAU); skinEditorCtx.fill();
+				}
+				skinEditorCtx.restore();
+				return;
+			}
+			skinEditorCtx.globalAlpha = skinEditorTool === "pencil" ? .82 : 1;
+			skinEditorCtx.lineCap = "round";
+			skinEditorCtx.lineJoin = "round";
+			skinEditorCtx.lineWidth = skinEditorTool === "pencil" ? Math.max(2, size * .45) : size;
+			skinEditorCtx.strokeStyle = skinEditorColor.value;
+			skinEditorCtx.fillStyle = skinEditorColor.value;
+			skinEditorCtx.beginPath();
+			skinEditorCtx.moveTo(lastX, lastY);
+			skinEditorCtx.lineTo(x, y);
+			skinEditorCtx.stroke();
+			skinEditorCtx.beginPath();
+			skinEditorCtx.arc(x, y, skinEditorCtx.lineWidth * .5, 0, TAU);
+			skinEditorCtx.fill();
+			skinEditorCtx.restore();
+		}
+
+		function hexToRgba(hex) {
+			const normalized = String(hex || "#000000").replace("#", "").padEnd(6, "0").slice(0, 6);
+			return [parseInt(normalized.slice(0, 2), 16), parseInt(normalized.slice(2, 4), 16), parseInt(normalized.slice(4, 6), 16), 255];
+		}
+
+		function floodFillSkinEditor(x, y, color) {
+			if (!skinEditorCtx || !skinEditorCanvas) return;
+			const w = skinEditorCanvas.width, h = skinEditorCanvas.height;
+			const image = skinEditorCtx.getImageData(0, 0, w, h);
+			const data = image.data;
+			const sx = Math.floor(x), sy = Math.floor(y), start = (sy * w + sx) * 4;
+			const target = [data[start], data[start + 1], data[start + 2], data[start + 3]];
+			const fill = hexToRgba(color);
+			const same = (idx, arr, tolerance = 18) => Math.abs(data[idx] - arr[0]) <= tolerance && Math.abs(data[idx + 1] - arr[1]) <= tolerance && Math.abs(data[idx + 2] - arr[2]) <= tolerance && Math.abs(data[idx + 3] - arr[3]) <= tolerance;
+			if (same(start, fill, 0)) return;
+			const stack = [[sx, sy]], visited = new Uint8Array(w * h);
+			while (stack.length) {
+				const [px, py] = stack.pop();
+				if (px < 0 || py < 0 || px >= w || py >= h) continue;
+				const vi = py * w + px;
+				if (visited[vi]) continue;
+				visited[vi] = 1;
+				const dx = px - 128, dy = py - 128;
+				if (dx * dx + dy * dy > 118 * 118) continue;
+				const idx = vi * 4;
+				if (!same(idx, target)) continue;
+				data[idx] = fill[0]; data[idx + 1] = fill[1]; data[idx + 2] = fill[2]; data[idx + 3] = fill[3];
+				stack.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+			}
+			skinEditorCtx.putImageData(image, 0, 0);
+		}
+
+		function applyCustomSkinFromEditor() {
+			if (!skinEditorCanvas) return;
+			config.customSkinDataUrl = skinEditorCanvas.toDataURL("image/png");
+			loadCustomSkinImage();
+			choosePlayerSkin("custom");
+			refreshSkinOptionSelection();
+			renderSkinOptionThumbs();
+			closeCustomSkinDialog();
+			showToast("Skin personalizada aplicada!");
 		}
 
 		function syncLabels() {
@@ -2431,8 +3082,9 @@
 			return x > state.camera.x - halfW && x < state.camera.x + halfW && y > state.camera.y - halfH && y < state.camera.y + halfH;
 		}
 
-		function drawBlobPath(x, y, r, seed, wobble = .035, roughness = 1, deform = null) {
-			const steps = 34; ctx.beginPath();
+		function drawBlobPath(x, y, r, seed, wobble = .035, roughness = 1, deform = null, targetCtx = ctx) {
+			const g = targetCtx;
+			const steps = 34; g.beginPath();
 			for (let i = 0; i <= steps; i++) {
 				const a = (i / steps) * TAU;
 				const nx = Math.cos(a), ny = Math.sin(a);
@@ -2456,9 +3108,9 @@
 				}
 				rr = Math.max(r * 0.72, rr);
 				const px = x + nx * rr; const py = y + ny * rr;
-				if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+				if (i === 0) g.moveTo(px, py); else g.lineTo(px, py);
 			}
-			ctx.closePath();
+			g.closePath();
 		}
 
 		function moodTint(c) {
@@ -2503,6 +3155,182 @@
 			ctx.restore();
 		}
 
+
+		function skinForCell(c) {
+			if (!c || c.type !== "player") return "plain";
+			return c.skin || config.playerSkin || "plain";
+		}
+
+		function shouldUseDefaultFace(skinKey) {
+			return !skinKey || skinKey === "plain";
+		}
+
+		function drawSkinAppendages(c, x, y, r, skinKey) {
+			if (!skinKey || skinKey === "plain" || skinIsEmoji(skinKey) || skinIsFlag(skinKey) || ["earth", "mars", "moon", "sun", "jupiter", "custom", "trex", "triceratops", "stego", "raptor"].includes(skinKey)) return;
+			ctx.save();
+			ctx.lineCap = "round";
+			ctx.lineJoin = "round";
+			if (skinKey === "spider") {
+				ctx.strokeStyle = "rgba(42,35,33,.72)";
+				ctx.lineWidth = Math.max(3, r * .08);
+				for (const side of [-1, 1]) for (let i = 0; i < 4; i++) {
+					const yy = y - r * .36 + i * r * .24;
+					ctx.beginPath();
+					ctx.moveTo(x + side * r * .52, yy);
+					ctx.quadraticCurveTo(x + side * r * .95, yy - r * .1, x + side * r * 1.22, yy + (i - 1.5) * r * .13);
+					ctx.stroke();
+				}
+			} else if (skinKey === "bee") {
+				ctx.fillStyle = "rgba(235,248,255,.58)";
+				ctx.strokeStyle = "rgba(78,66,55,.13)";
+				for (const side of [-1, 1]) { ctx.beginPath(); ctx.ellipse(x + side * r * .68, y - r * .22, r * .32, r * .2, side * .55, 0, TAU); ctx.fill(); ctx.stroke(); }
+			} else if (skinKey === "butterfly") {
+				ctx.fillStyle = "rgba(216,183,221,.46)";
+				ctx.strokeStyle = "rgba(78,66,55,.12)";
+				for (const side of [-1, 1]) { ctx.beginPath(); ctx.ellipse(x + side * r * .78, y - r * .12, r * .38, r * .52, side * .35, 0, TAU); ctx.fill(); ctx.stroke(); }
+			} else if (skinKey === "ant") {
+				ctx.strokeStyle = "rgba(62,45,36,.55)"; ctx.lineWidth = Math.max(2, r * .05);
+				for (const side of [-1, 1]) for (let i = 0; i < 3; i++) { const yy = y - r * .25 + i * r * .24; ctx.beginPath(); ctx.moveTo(x + side * r * .38, yy); ctx.lineTo(x + side * r * .9, yy + side * 0); ctx.stroke(); }
+			} else if (["trex", "raptor"].includes(skinKey)) {
+				ctx.fillStyle = skinKey === "trex" ? "rgba(97,148,88,.9)" : "rgba(120,156,94,.9)";
+				ctx.beginPath(); ctx.moveTo(x - r * .78, y + r * .1); ctx.quadraticCurveTo(x - r * 1.22, y - r * .12, x - r * 1.38, y - r * .42); ctx.quadraticCurveTo(x - r * 1.03, y - r * .22, x - r * .64, y - r * .05); ctx.fill();
+			} else if (skinKey === "stego") {
+				ctx.fillStyle = "rgba(216,120,105,.9)";
+				for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x + i * r * .18, y - r * .72); ctx.lineTo(x + i * r * .18 - r * .1, y - r * .42); ctx.lineTo(x + i * r * .18 + r * .12, y - r * .42); ctx.closePath(); ctx.fill(); }
+			} else if (skinKey === "triceratops") {
+				ctx.fillStyle = "rgba(230,219,171,.95)";
+				for (const side of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + side * r * .2, y - r * .64); ctx.lineTo(x + side * r * .32, y - r * 1.02); ctx.lineTo(x + side * r * .43, y - r * .6); ctx.closePath(); ctx.fill(); }
+			}
+			ctx.restore();
+		}
+
+		function drawSkinPattern(g, skinKey, x, y, r, c) {
+			const skin = skinByKey(skinKey);
+			if (!skinKey || skinKey === "plain") {
+				const fill = c.color || config.playerColor;
+				const grad = g.createRadialGradient(x - r * .28, y - r * .36, r * .1, x, y, r * 1.15);
+				grad.addColorStop(0, "rgba(255,255,255,.34)");
+				grad.addColorStop(.25, fill);
+				grad.addColorStop(1, fill);
+				g.fillStyle = grad;
+				g.fillRect(x - r, y - r, r * 2, r * 2);
+				return;
+			}
+			if (skinKey === "custom") {
+				if (customSkinImage) g.drawImage(customSkinImage, x - r, y - r, r * 2, r * 2);
+				else {
+					g.fillStyle = c.color || config.playerColor;
+					g.fillRect(x - r, y - r, r * 2, r * 2);
+				}
+				return;
+			}
+			if (skinIsFlag(skinKey)) {
+				drawFlagPattern(g, skinKey, x, y, r);
+				g.fillStyle = "rgba(255,255,255,.16)";
+				g.fillRect(x - r, y - r, r * 2, r * .34);
+				return;
+			}
+			if (skinIsEmoji(skinKey)) {
+				const bg = g.createRadialGradient(x - r * .3, y - r * .34, r * .08, x, y, r * 1.05);
+				bg.addColorStop(0, "#fff6b2");
+				bg.addColorStop(.6, "#f6cc4a");
+				bg.addColorStop(1, "#e7a844");
+				g.fillStyle = bg;
+				g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.font = `${r * 1.25}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", system-ui`;
+				g.textAlign = "center";
+				g.textBaseline = "middle";
+				g.fillText(skin.emoji || "🙂", x, y + r * .04);
+				return;
+			}
+
+			if (["trex", "triceratops", "stego", "raptor"].includes(skinKey)) {
+				const bg = g.createLinearGradient(x - r, y - r, x + r, y + r);
+				if (skinKey === "triceratops") { bg.addColorStop(0, "#efe4a9"); bg.addColorStop(1, "#b8c380"); }
+				else if (skinKey === "stego") { bg.addColorStop(0, "#dfe9b6"); bg.addColorStop(1, "#9fbe70"); }
+				else if (skinKey === "raptor") { bg.addColorStop(0, "#d6e4a3"); bg.addColorStop(1, "#7ea35a"); }
+				else { bg.addColorStop(0, "#d6e8a6"); bg.addColorStop(1, "#7daa62"); }
+				g.fillStyle = bg;
+				g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.fillStyle = "rgba(255,255,255,.14)";
+				for (let i = 0; i < 8; i++) {
+					g.beginPath();
+					g.arc(x + Math.cos(c.seed * 1.2 + i * .9) * r * .64, y + Math.sin(c.seed * .7 + i * 1.4) * r * .58, r * (.045 + (i % 3) * .015), 0, TAU);
+					g.fill();
+				}
+				drawPixelSprite(g, skinKey, x, y, r);
+				return;
+			}
+
+			if (skinKey === "earth") {
+				const ocean = g.createRadialGradient(x - r * .3, y - r * .35, r * .1, x, y, r * 1.15);
+				ocean.addColorStop(0, "#9ce6ef"); ocean.addColorStop(.55, "#49a7c2"); ocean.addColorStop(1, "#2d7891");
+				g.fillStyle = ocean; g.fillRect(x - r, y - r, r * 2, r * 2);
+				const masses = [
+					[-.36, -.12, .34, .18, .1], [.2, -.28, .28, .16, -.3], [.3, .2, .22, .13, .38], [-.18, .3, .25, .14, -.22], [.02, .04, .16, .11, .6]
+				];
+				for (const [ox, oy, rx, ry, rot] of masses) {
+					g.save(); g.translate(x + ox * r, y + oy * r); g.rotate(rot);
+					g.beginPath(); g.moveTo(-r * rx, 0); g.bezierCurveTo(-r * rx * .5, -r * ry, r * rx * .4, -r * ry, r * rx, 0); g.bezierCurveTo(r * rx * .45, r * ry, -r * rx * .4, r * ry, -r * rx, 0); g.closePath();
+					g.fillStyle = "#76c06f"; g.fill();
+					g.fillStyle = "rgba(53,120,52,.22)"; g.fill();
+					g.restore();
+				}
+				g.strokeStyle = "rgba(255,255,255,.52)"; g.lineWidth = Math.max(2, r * .05);
+				for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(x - r * .18 + i * r * .22, y - r * .18 + i * r * .06, r * (.68 - i * .08), Math.PI * .1, Math.PI * .46); g.stroke(); }
+			} else if (skinKey === "mars") {
+				const grad = g.createRadialGradient(x - r * .25, y - r * .3, r * .1, x, y, r * 1.08);
+				grad.addColorStop(0, "#f1bb88"); grad.addColorStop(.58, "#c76e45"); grad.addColorStop(1, "#8e452f");
+				g.fillStyle = grad; g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.fillStyle = "rgba(116,56,39,.24)";
+				for (let i = 0; i < 11; i++) { const cr = r * randBySeed(c.seed + i * 5, .07, .18); const cx = x + Math.cos(c.seed * .7 + i) * r * randBySeed(c.seed + i * 3, .12, .62); const cy = y + Math.sin(c.seed * .9 + i * 1.4) * r * randBySeed(c.seed + i * 4, .12, .62); g.beginPath(); g.arc(cx, cy, cr, 0, TAU); g.fill(); }
+				g.fillStyle = "rgba(245,194,116,.18)"; g.fillRect(x - r, y - r * .05, r * 2, r * .14);
+			} else if (skinKey === "moon") {
+				const grad = g.createRadialGradient(x - r * .3, y - r * .34, r * .08, x, y, r * 1.1);
+				grad.addColorStop(0, "#f2eee5"); grad.addColorStop(.55, "#cfc9bd"); grad.addColorStop(1, "#9e988e");
+				g.fillStyle = grad; g.fillRect(x - r, y - r, r * 2, r * 2);
+				for (let i = 0; i < 10; i++) { const cr = r * randBySeed(c.seed + i, .06, .18); const cx = x + Math.cos(c.seed + i * 2.2) * r * randBySeed(c.seed + i * 5, .06, .64); const cy = y + Math.sin(c.seed * .8 + i * 1.7) * r * randBySeed(c.seed + i * 7, .06, .64); g.beginPath(); g.arc(cx, cy, cr, 0, TAU); g.fillStyle = "rgba(109,100,92,.14)"; g.fill(); g.strokeStyle = "rgba(255,255,255,.2)"; g.lineWidth = Math.max(1, cr * .14); g.stroke(); }
+			} else if (skinKey === "sun") {
+				const grad = g.createRadialGradient(x - r * .22, y - r * .26, r * .08, x, y, r * 1.12);
+				grad.addColorStop(0, "#fff8c2"); grad.addColorStop(.36, "#ffd15e"); grad.addColorStop(.7, "#f29e3e"); grad.addColorStop(1, "#db6531");
+				g.fillStyle = grad; g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.fillStyle = "rgba(255,240,171,.22)";
+				for (let i = 0; i < 14; i++) { const a = i / 14 * TAU; g.beginPath(); g.moveTo(x + Math.cos(a) * r * .74, y + Math.sin(a) * r * .74); g.lineTo(x + Math.cos(a + .08) * r * 1.03, y + Math.sin(a + .08) * r * 1.03); g.lineTo(x + Math.cos(a - .08) * r * 1.03, y + Math.sin(a - .08) * r * 1.03); g.closePath(); g.fill(); }
+				g.fillStyle = "rgba(130,67,33,.16)"; for (let i = 0; i < 5; i++) { g.beginPath(); g.ellipse(x + Math.cos(i * 1.2) * r * .34, y + Math.sin(i * 1.6) * r * .26, r * .18, r * .08, i * .3, 0, TAU); g.fill(); }
+			} else if (skinKey === "jupiter") {
+				const bands = ["#f7e4bf", "#dcb281", "#c98c63", "#f0dbb2", "#b06d4c", "#edd0a1", "#d4a074", "#f7e4bf"];
+				const stripeH = (r * 2) / bands.length;
+				for (let i = 0; i < bands.length; i++) { g.fillStyle = bands[i]; g.fillRect(x - r, y - r + i * stripeH, r * 2, stripeH + 1); }
+				g.fillStyle = "rgba(255,255,255,.14)"; for (let i = 0; i < 5; i++) { g.fillRect(x - r, y - r + (i + .45) * stripeH, r * 2, stripeH * .18); }
+				g.beginPath(); g.ellipse(x + r * .3, y + r * .18, r * .27, r * .16, -.18, 0, TAU); g.fillStyle = "rgba(187,88,56,.72)"; g.fill();
+			} else if (skinKey === "ladybug") {
+				const grad = g.createLinearGradient(x - r, y - r, x + r, y + r); grad.addColorStop(0, "#ff7e6c"); grad.addColorStop(1, "#c73b36"); g.fillStyle = grad; g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.fillStyle = "rgba(28,20,20,.84)"; g.fillRect(x - r * .05, y - r, r * .1, r * 2); g.beginPath(); g.arc(x, y - r * .72, r * .42, 0, TAU); g.fill();
+				for (const sx of [-.46, -.22, .22, .46]) for (const sy of [-.22, .14, .44]) { if (Math.abs(sx) < .24 && sy > .3) continue; g.beginPath(); g.arc(x + sx * r, y + sy * r, r * .09, 0, TAU); g.fill(); }
+			} else if (skinKey === "spider") {
+				const grad = g.createRadialGradient(x - r * .18, y - r * .24, r * .07, x, y, r * 1.05); grad.addColorStop(0, "#6d584e"); grad.addColorStop(1, "#332924"); g.fillStyle = grad; g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.fillStyle = "rgba(17,12,12,.44)"; g.beginPath(); g.ellipse(x, y + r * .14, r * .48, r * .42, 0, 0, TAU); g.fill(); g.beginPath(); g.ellipse(x, y - r * .28, r * .28, r * .24, 0, 0, TAU); g.fill();
+				g.fillStyle = "rgba(255,255,255,.88)"; for (const side of [-1, 1]) { g.beginPath(); g.arc(x + side * r * .12, y - r * .33, r * .048, 0, TAU); g.fill(); }
+			} else if (skinKey === "bee") {
+				g.fillStyle = "#f4ca54"; g.fillRect(x - r, y - r, r * 2, r * 2);
+				for (let i = 0; i < 6; i++) { if (i % 2 === 1) { g.fillStyle = "rgba(37,29,24,.84)"; g.fillRect(x - r, y - r + i * r * .34, r * 2, r * .22); } }
+				g.fillStyle = "rgba(255,255,255,.45)"; g.beginPath(); g.ellipse(x - r * .24, y - r * .35, r * .28, r * .18, -.45, 0, TAU); g.fill(); g.beginPath(); g.ellipse(x + r * .24, y - r * .35, r * .28, r * .18, .45, 0, TAU); g.fill();
+			} else if (skinKey === "butterfly") {
+				const grad = g.createLinearGradient(x - r, y - r, x + r, y + r); grad.addColorStop(0, "#f5a6bf"); grad.addColorStop(.45, "#d8b7dd"); grad.addColorStop(1, "#95d8c6"); g.fillStyle = grad; g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.fillStyle = "rgba(255,255,255,.22)"; for (const side of [-1, 1]) { g.beginPath(); g.ellipse(x + side * r * .34, y - r * .04, r * .32, r * .44, side * .16, 0, TAU); g.fill(); }
+				g.strokeStyle = "rgba(74,57,44,.36)"; g.lineWidth = Math.max(2, r * .04); g.beginPath(); g.moveTo(x, y - r * .58); g.lineTo(x, y + r * .58); g.stroke();
+			} else if (skinKey === "ant") {
+				const grad = g.createLinearGradient(x - r, y - r, x + r, y + r); grad.addColorStop(0, "#8a5648"); grad.addColorStop(1, "#56372f"); g.fillStyle = grad; g.fillRect(x - r, y - r, r * 2, r * 2);
+				g.fillStyle = "rgba(46,28,25,.24)";
+				for (const yy of [-.4, 0, .4]) { g.beginPath(); g.ellipse(x, y + yy * r, r * .34, r * .24, 0, 0, TAU); g.fill(); }
+			}
+
+			g.fillStyle = "rgba(255,255,255,.16)";
+			g.beginPath();
+			g.arc(x - r * .24, y - r * .28, r * .48, 0, TAU);
+			g.fill();
+		}
+
 		function drawBlob(c) {
 			const v = c.visual, x = v.x + v.jx, y = v.y + v.jy, r = v.radius, pulse = v.pulse ? r * .045 : 0;
 			const outlineSeed = v.outlineSeed ?? c.seed;
@@ -2513,21 +3341,30 @@
 				pressX: v.softPressX ?? 0, pressY: v.softPressY ?? 0, pressAmt: v.softPressAmt ?? 0
 			};
 			if (!isVisible(x, y, r)) return;
+			const skinKey = skinForCell(c);
 			ctx.save(); ctx.translate(x, y); ctx.scale(v.squash || 1, 1 / (v.squash || 1)); ctx.translate(-x, -y);
 			ctx.beginPath(); ctx.ellipse(x + r * .08, y + r * .16, r * .9, r * .34, 0, 0, TAU); ctx.fillStyle = "rgba(80,55,35,.13)"; ctx.fill();
+			drawSkinAppendages(c, x, y, r, skinKey);
 			if (c.rewardUntil > state.time || c.effects.spawnShieldUntil > state.time || c.effects.shieldUntil > state.time || c.effects.speedUntil > state.time || c.effects.paintBoostUntil > state.time || c.effects.dashUntil > state.time) {
 				drawBlobPath(x, y, r + 12 + Math.sin(state.time * 8) * 2, outlineSeed, outlineWobble * .92, outlineRoughness, deform);
 				ctx.fillStyle = c.effects.spawnShieldUntil > state.time ? "rgba(255,255,255,.22)" : c.effects.shieldUntil > state.time ? "rgba(255,188,211,.18)" : c.effects.speedUntil > state.time || c.effects.dashUntil > state.time ? "rgba(130,202,232,.16)" : c.effects.paintBoostUntil > state.time ? "rgba(255,238,168,.14)" : "rgba(255,219,122,.16)"; ctx.fill();
 			}
-			drawBlobPath(x, y, r + pulse, outlineSeed, outlineWobble, outlineRoughness, deform); ctx.fillStyle = c.color; ctx.globalAlpha = .93; ctx.fill(); ctx.globalAlpha = 1;
+			drawBlobPath(x, y, r + pulse, outlineSeed, outlineWobble, outlineRoughness, deform);
+			ctx.fillStyle = c.color; ctx.globalAlpha = .93; ctx.fill(); ctx.globalAlpha = 1;
 			ctx.save();
 			drawBlobPath(x, y, r + pulse, outlineSeed, outlineWobble, outlineRoughness, deform);
 			ctx.clip();
-			for (let i = 0; i < 4; i++) { const a = c.seed + i * 1.7; const px = x + Math.cos(a) * r * randBySeed(c.seed + i, .02, .32); const py = y + Math.sin(a * 1.41) * r * randBySeed(c.seed + i * 4, .02, .32); ctx.beginPath(); ctx.arc(px, py, r * randBySeed(c.seed + i * 10, .25, .72), 0, TAU); ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,.13)" : "rgba(120,90,60,.035)"; ctx.fill(); }
-			ctx.beginPath(); ctx.arc(x - r * .15, y - r * .2, r * .62, 0, TAU); ctx.fillStyle = moodTint(c); ctx.fill(); ctx.restore();
+			if (skinKey === "plain") {
+				for (let i = 0; i < 4; i++) { const a = c.seed + i * 1.7; const px = x + Math.cos(a) * r * randBySeed(c.seed + i, .02, .32); const py = y + Math.sin(a * 1.41) * r * randBySeed(c.seed + i * 4, .02, .32); ctx.beginPath(); ctx.arc(px, py, r * randBySeed(c.seed + i * 10, .25, .72), 0, TAU); ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,.13)" : "rgba(120,90,60,.035)"; ctx.fill(); }
+				ctx.beginPath(); ctx.arc(x - r * .15, y - r * .2, r * .62, 0, TAU); ctx.fillStyle = moodTint(c); ctx.fill();
+			} else {
+				drawSkinPattern(ctx, skinKey, x, y, r + pulse, c);
+				if (c.effects.inkUntil > state.time || c.effects.shieldUntil > state.time || c.rewardUntil > state.time) { ctx.beginPath(); ctx.arc(x - r * .15, y - r * .2, r * .62, 0, TAU); ctx.fillStyle = moodTint(c); ctx.fill(); }
+			}
+			ctx.restore();
 			ctx.lineWidth = Math.max(1.2, r * .035); ctx.strokeStyle = "rgba(77,63,45,.17)"; drawBlobPath(x, y, r + pulse, outlineSeed, outlineWobble, outlineRoughness, deform); ctx.stroke();
 			if (c.type === "player") { ctx.lineWidth = Math.max(2.4, r * .06); ctx.strokeStyle = "rgba(49,119,111,.45)"; drawBlobPath(x, y, r + 3.5 + pulse, outlineSeed, outlineWobble * .9, Math.max(.8, outlineRoughness - .04), deform); ctx.stroke(); }
-			drawFace(c, x, y, r);
+			if (shouldUseDefaultFace(skinKey)) drawFace(c, x, y, r);
 			if (r > 18) { ctx.font = `900 ${clamp(r * .27, 10, 16)}px ui-rounded, Segoe UI, system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,.66)"; ctx.fillStyle = "rgba(72,62,53,.72)"; ctx.strokeText(c.name, x, y + r * .74); ctx.fillText(c.name, x, y + r * .74); }
 			ctx.restore();
 		}
@@ -2856,6 +3693,7 @@
 			addEventListener("pointermove", e => { if (config.touchControls && e.pointerType !== "mouse" && state.touch.active) return; state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
 			addEventListener("pointerdown", e => { if (config.touchControls && e.pointerType !== "mouse" && state.touch.active) return; state.input.screenX = e.clientX; state.input.screenY = e.clientY; state.input.hasPointer = true; });
 			addEventListener("keydown", e => {
+				if (e.key === "Escape" && skinDialog && skinDialog.classList.contains("active")) { closeSkinDialog(); return; }
 				if (e.key === "Escape" && modeDialog.classList.contains("active")) { closeModeDialog(); return; }
 				if (e.code === "Space") { e.preventDefault(); splitPlayer(); return; }
 				if (e.key.toLowerCase() === "w") { e.preventDefault(); ejectMass(); return; }
@@ -2888,6 +3726,15 @@
 			touchDashButton.addEventListener("click", () => { pulseTouchFeedback(); dashPlayer(); });
 			touchPauseButton.addEventListener("click", () => { pulseTouchFeedback(8); togglePause(); });
 			openModeDialogButton.addEventListener("click", openModeDialog);
+			if (openSkinDialogButton) openSkinDialogButton.addEventListener("click", openSkinDialog);
+			if (closeSkinDialogButton) closeSkinDialogButton.addEventListener("click", closeSkinDialog);
+			if (applySkinDialogButton) applySkinDialogButton.addEventListener("click", applySkinDialog);
+			if (skinDialog) skinDialog.addEventListener("click", event => { if (event.target === skinDialog) closeSkinDialog(); });
+			if (clearCustomSkinButton) clearCustomSkinButton.addEventListener("click", () => { config.customSkinDataUrl = ""; customSkinImage = null; seedCustomSkinCanvas(); renderPlayerSkinPreview(); renderSkinOptionThumbs(); saveSkinPreferences(); });
+			if (useCustomSkinButton) useCustomSkinButton.addEventListener("click", applyCustomSkinFromEditor);
+			if (closeCustomSkinDialogButton) closeCustomSkinDialogButton.addEventListener("click", closeCustomSkinDialog);
+			if (applyCustomSkinDialogButton) applyCustomSkinDialogButton.addEventListener("click", applyCustomSkinFromEditor);
+			if (customSkinDialog) customSkinDialog.addEventListener("click", event => { if (event.target === customSkinDialog) closeCustomSkinDialog(); });
 			closeModeDialogButton.addEventListener("click", closeModeDialog);
 			applyModeDialogButton.addEventListener("click", applyDraftMode);
 			modeDialog.addEventListener("click", event => { if (event.target === modeDialog) closeModeDialog(); });
@@ -2916,7 +3763,7 @@
 			jitterStrengthInput.addEventListener("input", () => { config.jitterStrength = Number(jitterStrengthInput.value); });
 		}
 
-		function boot() { config.touchControls = isTouchDevice; resize(); createPaperPattern(); syncLabels(); refreshModeSummary(); refreshDialogModeDetails(); buildArena(true); showMainMenu(); updateTouchUIVisibility(); bindEvents(); requestAnimationFrame(loop); }
+		function boot() { config.touchControls = isTouchDevice; resize(); createPaperPattern(); mountCustomSkinEditorPopup(); loadSkinPreferences(); buildSkinOptionList(); setupSkinEditorCanvas(); syncLabels(); refreshModeSummary(); refreshDialogModeDetails(); buildArena(true); showMainMenu(); updateTouchUIVisibility(); bindEvents(); requestAnimationFrame(loop); }
 		boot();
 	})();
 	</script>
